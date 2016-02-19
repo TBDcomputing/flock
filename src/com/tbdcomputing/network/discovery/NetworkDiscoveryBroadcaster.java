@@ -84,7 +84,7 @@ public class NetworkDiscoveryBroadcaster {
 
 	public static void main(String[] args) throws IOException {
 		NetworkDiscoveryBroadcaster caster = new NetworkDiscoveryBroadcaster();
-		caster.findHosts();
+		System.out.println(caster.findHosts());
 	}
 
 }
