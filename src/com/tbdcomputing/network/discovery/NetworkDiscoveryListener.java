@@ -11,7 +11,7 @@ public class NetworkDiscoveryListener implements Runnable {
 					byte[] buf = new byte[1000];
 					DatagramPacket packet = new DatagramPacket(buf, buf.length);
 					socket.receive(packet);
-					System.out.println("Recieved a packet!");
+					System.out.println("Recieved a packet! Data: " + new String(packet.getData()));
 
 					// Don't respond to ourself because we will fail to bind to
 					// our same port
