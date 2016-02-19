@@ -27,9 +27,7 @@ public class NetworkDiscoveryListener implements Runnable {
 					e.printStackTrace();
 				}
 			}
-			// } catch (UnknownHostException e1) {
-			// System.out.println("Failed to find host 255.255.255.255");
-			// e1.printStackTrace();
+
 		} catch (SocketException e1) {
 			System.out.println("Failed to create socket.");
 			e1.printStackTrace();
