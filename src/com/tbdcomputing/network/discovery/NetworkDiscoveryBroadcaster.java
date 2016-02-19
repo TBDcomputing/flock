@@ -9,6 +9,7 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * This class broadcasts to every other node on the network and then waits for a
@@ -46,6 +47,11 @@ public class NetworkDiscoveryBroadcaster {
 			sock.setBroadcast(true);
 			sock.setSoTimeout(10000);
 			byte[] buf = new byte[1000];
+
+			Scanner scanner = new Scanner(System.in);
+			System.out.print("Enter a message: ");
+			byte[] msg = scanner.nextLine().getBytes();
+			System.arraycopy(msg, 0, buf, 0, msg.length);
 
 			DatagramPacket data = new DatagramPacket(buf, buf.length, addr, PORT);
 			sock.send(data);
