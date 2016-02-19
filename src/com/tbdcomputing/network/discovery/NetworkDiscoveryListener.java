@@ -15,13 +15,11 @@ public class NetworkDiscoveryListener implements Runnable {
 
 					// Don't respond to ourself because we will fail to bind to
 					// our same port
-					System.out.println(InetAddress.getLocalHost() + " | " + packet.getAddress());
+					System.out.println(InetAddress.getLocalHost() + " | " + packet.getAddress() + " | " + InetAddress.getLocalHost().equals(packet.getAddress()));
 
 					if (!InetAddress.getLocalHost().equals(packet.getAddress())) {
-
-						DatagramSocket sendSocket = new DatagramSocket(8888, packet.getAddress());
-						sendSocket.send(new DatagramPacket(buf, buf.length));
-						sendSocket.close();
+					
+						socket.send(new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort()));
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
