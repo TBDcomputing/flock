@@ -1,4 +1,4 @@
-package networkDiscovery;
+package com.tbdcomputing.network.discovery;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
