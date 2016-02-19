@@ -26,4 +26,14 @@ public class NetworkDiscoveryListener implements Runnable {
             System.err.println(e.getMessage());
         }
     }
+
+
+    public static void main(String[] args) {
+        new Thread() {
+            @Override
+            public void run() {
+                new NetworkDiscoveryListener().run();
+            }
+        }.start();
+    }
 }
