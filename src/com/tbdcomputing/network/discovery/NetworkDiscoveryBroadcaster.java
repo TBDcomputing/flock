@@ -56,9 +56,10 @@ public class NetworkDiscoveryBroadcaster {
 			DatagramPacket data = new DatagramPacket(buf, buf.length, addr, PORT);
 			sock.send(data);
 
-			DatagramPacket recv = new DatagramPacket(buf, 0, buf.length);
 			while (!sock.isClosed()) {
 				try {
+					DatagramPacket recv = new DatagramPacket(buf, buf.length);
+
 					sock.receive(recv);
 					String rcvd = "rcvd from " + recv.getAddress() + ", " + recv.getPort() + ": "
 							+ new String(recv.getData(), 0, recv.getLength());
