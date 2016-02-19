@@ -44,7 +44,7 @@ public class NetworkDiscoveryBroadcaster {
 
 			DatagramSocket sock = new DatagramSocket();
 			sock.setBroadcast(true);
-			sock.setSoTimeout(3000);
+			sock.setSoTimeout(10000);
 			byte[] buf = new byte[1000];
 
 			DatagramPacket data = new DatagramPacket(buf, buf.length, addr, PORT);
