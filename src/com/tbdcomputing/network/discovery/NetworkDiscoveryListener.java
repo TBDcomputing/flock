@@ -2,7 +2,17 @@ package com.tbdcomputing.network.discovery;
 
 import java.net.*;
 
+/**
+ * This class listens for UDP broadcasts from any clients interested in gathering this node's information. It responds
+ * with the listener's IP address and any other relevant information for the purpose of initiating gossip on the
+ * broadcasting node.
+ */
 public class NetworkDiscoveryListener implements Runnable {
+
+	/**
+	 * Listens for a broadcast, and then responds with the listener's IP address and any other relevant gossip
+	 * information.
+	 */
 	public void run() {
 		try {
 			DatagramSocket socket = new DatagramSocket(8888);
@@ -15,11 +25,11 @@ public class NetworkDiscoveryListener implements Runnable {
 
 					// Don't respond to ourself because we will fail to bind to
 					// our same port
-					System.out.println(InetAddress.getLocalHost() + " | " + packet.getAddress() + " | " + InetAddress.getLocalHost().equals(packet.getAddress()));
+					System.out.println(InetAddress.getLocalHost() + " | " + packet.getAddress() + " | " + InetAddress.getLocalHost().equals(packet.getAddress())); //useful testing code
 
-					if (!InetAddress.getLocalHost().equals(packet.getAddress())) {
+					if (!InetAddress.getLocalHost().equals(packet.getAddress())) { //TODO comparison by UUID
 					
-						socket.send(new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort()));
+						socket.send(new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort()));//TODO send back gossip data
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
