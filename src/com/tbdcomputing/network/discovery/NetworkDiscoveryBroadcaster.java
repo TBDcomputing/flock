@@ -1,5 +1,7 @@
 package com.tbdcomputing.network.discovery;
 
+import com.tbdcomputing.network.Constants;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -19,15 +21,7 @@ import java.util.Scanner;
  * @author drew
  *
  */
-public class NetworkDiscoveryBroadcaster {
-	private static final int PORT = 8888;
-
-	/**
-	 * Currently does nothing.
-	 */
-	public NetworkDiscoveryBroadcaster() {
-		// Intentionally left blank
-	}
+public class NetworkDiscoveryBroadcaster implements Runnable {
 
 	/**
 	 * Creates a list of IP addresses based on nodes that respond to the
@@ -53,7 +47,7 @@ public class NetworkDiscoveryBroadcaster {
 			byte[] msg = scanner.nextLine().getBytes();
 			System.arraycopy(msg, 0, buf, 0, msg.length);
 
-			DatagramPacket data = new DatagramPacket(buf, buf.length, addr, PORT);
+			DatagramPacket data = new DatagramPacket(buf, buf.length, addr, Constants.PORT);
 			sock.send(data);
 
 			while (!sock.isClosed()) {
@@ -89,9 +83,25 @@ public class NetworkDiscoveryBroadcaster {
 		return addresses;
 	}
 
-	public static void main(String[] args) throws IOException {
-		NetworkDiscoveryBroadcaster caster = new NetworkDiscoveryBroadcaster();
-		System.out.println(caster.findHosts());
-	}
+	@Override
+	public void run() {
+		try {
+			InetAddress addr = InetAddress.getByName(Constants.BROADCAST_ADDRESS);
 
+			DatagramSocket sock = new DatagramSocket();
+			sock.setBroadcast(true);
+			sock.setSoTimeout(1000);
+			byte[] buf = new byte[1000];
+
+			DatagramPacket data = new DatagramPacket(buf, buf.length, addr, Constants.PORT);
+			sock.send(data);
+			sock.close();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		} catch (SocketException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
