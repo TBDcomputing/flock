@@ -29,43 +29,43 @@ public class GossipNode {
 		setStatus(GossipStatus.STARTING);
 	}
 
-	public String getUuid() {
+	public synchronized String getUuid() {
 		return uuid;
 	}
 
-	public void setUuid(String uuid) {
+	public synchronized void setUuid(String uuid) {
 		this.uuid = uuid;
 	}
 
-	public InetAddress getAddr() {
+	public synchronized InetAddress getAddr() {
 		return addr;
 	}
 
-	public void setAddr(InetAddress addr) {
+	public synchronized void setAddr(InetAddress addr) {
 		this.addr = addr;
 	}
 
-	public int getHeartbeat() {
+	public synchronized int getHeartbeat() {
 		return heartbeat;
 	}
 
-	public void setHeartbeat(int heartbeat) {
+	public synchronized void setHeartbeat(int heartbeat) {
 		this.heartbeat = heartbeat;
 	}
 
-	public long getGenerationTime() {
+	public synchronized long getGenerationTime() {
 		return generationTime;
 	}
 
-	public void setGenerationTime(long generationTime) {
+	public synchronized void setGenerationTime(long generationTime) {
 		this.generationTime = generationTime;
 	}
 
-	public GossipStatus getStatus() {
+	public synchronized GossipStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(GossipStatus status) {
+	public synchronized void setStatus(GossipStatus status) {
 		this.status = status;
 	}
 }
