@@ -1,5 +1,8 @@
 package com.tbdcomputing.network.gossip;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.net.InetAddress;
 
 
@@ -21,19 +24,29 @@ public class GossipNode {
 
 	}
 	
-	public GossipNode(InetAddress addr) {
-		setUuid("");
-		this.setAddr(addr);
-		this.setHeartbeat(0);
-		this.setGenerationTime(System.currentTimeMillis());
-		setStatus(GossipStatus.STARTING);
+//	public GossipNode(InetAddress addr) {
+//		setUUID("");
+//		this.setAddr(addr);
+//		this.setHeartbeat(0);
+//		this.setGenerationTime(System.currentTimeMillis());
+//		setStatus(GossipStatus.STARTING);
+//	}
+
+	public GossipNode(JSONObject json) throws JSONException {
+		this.setUUID(json.getString("id"));
+		// TODO populate other fields as we populate the JSON
 	}
 
-	public synchronized String getUuid() {
+	@Override
+	public String toString() {
+		return "UUID: " + getUUID();
+	}
+
+	public synchronized String getUUID() {
 		return uuid;
 	}
 
-	public synchronized void setUuid(String uuid) {
+	public synchronized void setUUID(String uuid) {
 		this.uuid = uuid;
 	}
 

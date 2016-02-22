@@ -28,6 +28,7 @@ public class NetworkDiscoveryReceiver implements Runnable {
      */
     public void run() {
         try {
+            // TODO: set max size for buf in Constants, and use it here
             byte[] buf = new byte[1000];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
             socket.receive(packet);

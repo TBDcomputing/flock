@@ -1,14 +1,12 @@
 package com.tbdcomputing.network.discovery;
 
 import com.tbdcomputing.network.Constants;
+import org.json.JSONObject;
+import org.omg.SendingContext.RunTime;
+import sun.security.provider.MD5;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -83,6 +81,9 @@ public class NetworkDiscoveryBroadcaster implements Runnable {
 		return addresses;
 	}
 
+	/**
+	 * Broadcasts its UUID to all the nodes on the network.
+	 */
 	@Override
 	public void run() {
 		try {
@@ -91,8 +92,14 @@ public class NetworkDiscoveryBroadcaster implements Runnable {
 			DatagramSocket sock = new DatagramSocket();
 			sock.setBroadcast(true);
 			sock.setSoTimeout(1000);
-			byte[] buf = new byte[1000];
 
+			JSONObject json = new JSONObject();
+			String uuid = Constants.getUUID();
+			if (uuid == null) {
+				throw new RuntimeException("Couldn't generate UUID");
+			}
+			json.put("id", uuid);
+			byte[] buf = json.toString().getBytes();
 			DatagramPacket data = new DatagramPacket(buf, buf.length, addr, Constants.PORT);
 			sock.send(data);
 			sock.close();

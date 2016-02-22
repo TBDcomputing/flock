@@ -3,11 +3,10 @@ package com.tbdcomputing.network;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryBroadcaster;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryListener;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryReceiver;
-import jdk.nashorn.internal.ir.debug.JSONWriter;
+import com.tbdcomputing.network.gossip.GossipNode;
 import org.json.JSONObject;
 
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.SocketException;
 
 /**
@@ -19,8 +18,12 @@ public class Flock {
     private static NetworkDiscoveryListener basicListener = new NetworkDiscoveryListener() {
         @Override
         public void onNodeDiscovered(DatagramPacket packet) {
-            // read the uuid in, store the info about this node
-            System.out.println(String.format("Node Discovered: %s, Data: %s", packet.getAddress().getHostAddress(), new String(packet.getData())));
+            GossipNode node = new GossipNode(new JSONObject(new String(packet.getData())));
+            if (node.getUUID().equals(Constants.getUUID())) {
+                System.out.println("Discovered self...");
+            } else {
+                System.out.println("Other node: " + node);
+            }
         }
     };
     private static NetworkDiscoveryReceiver receiver;
@@ -28,12 +31,15 @@ public class Flock {
     private static NetworkDiscoveryBroadcaster broadcaster = new NetworkDiscoveryBroadcaster();
 
     public static void main(String[] args) {
+        // set up the receiver with the listener
+        // throws a SocketException if we can't bind to the port
         try {
             receiver = new NetworkDiscoveryReceiver(basicListener);
         } catch (SocketException e) {
             e.printStackTrace();
             return;
         }
+        // continually listen for new nodes
         receiverThread = new CancellableThread() {
             @Override
             public void run() {
@@ -44,6 +50,7 @@ public class Flock {
         };
         receiverThread.start();
 
+        // broadcast our existence every 10 seconds
         broadcasterThread = new CancellableThread() {
             @Override
             public void run() {
@@ -58,6 +65,8 @@ public class Flock {
             }
         };
         broadcasterThread.start();
+
+        // TODO: add way cancel the above threads so that they can be joined below
 
         try {
             receiverThread.join();
