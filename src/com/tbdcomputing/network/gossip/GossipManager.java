@@ -7,11 +7,8 @@ public class GossipManager {
     private GossipNode me;
 
     public GossipManager() {
-
-    }
-
-
-    public void run() {
-
+        me = new GossipNode();
+        nodes = new ArrayList<>();
+        nodes.add(me);
     }
 }

@@ -1,5 +1,6 @@
 package com.tbdcomputing.network.gossip;
 
+import com.tbdcomputing.network.Constants;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -19,8 +20,13 @@ public class GossipNode {
     private long generationTime;
     private GossipStatus status;
 
+    /**
+     * This constructor should be used to populate the local GossipNode for this node. Otherwise, populate it with
+     * GossipNode(JSONObject json) from the packet data.
+     */
     public GossipNode() {
-
+        this.setUUID(Constants.getUUID());
+        // TODO populate other fields
     }
 
 //	public GossipNode(InetAddress addr) {

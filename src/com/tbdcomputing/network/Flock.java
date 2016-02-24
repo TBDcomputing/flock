@@ -3,6 +3,7 @@ package com.tbdcomputing.network;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryBroadcaster;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryListener;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryReceiver;
+import com.tbdcomputing.network.gossip.GossipManager;
 import com.tbdcomputing.network.gossip.GossipNode;
 import org.json.JSONObject;
 
@@ -35,7 +36,11 @@ public class Flock {
     private static Thread broadcasterThread;
     private static NetworkDiscoveryBroadcaster broadcaster = new NetworkDiscoveryBroadcaster();
 
+    // stores information about the nodes including itself
+    private static GossipManager manager = new GossipManager();
+
     public static void main(String[] args) {
+
         // set up the receiver with the listener
         // throws a SocketException if we can't bind to the port
         try {
