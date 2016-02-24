@@ -9,20 +9,16 @@ import java.util.Collections;
 import com.tbdcomputing.network.Constants;
 import org.json.JSONArray;
 
+/**
+ * This manager class will keep track of the GossipNodes in the network.
+ */
 public class GossipManager {
 	private List<GossipNode> nodes;
 	private GossipNode me;
 
 	public GossipManager() {
 		nodes = Collections.synchronizedList(new ArrayList<GossipNode>());
-		
-		try {
-			me = new GossipNode(InetAddress.getLocalHost());
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+        me = new GossipNode();
 		nodes.add(me);
 	}
 
@@ -80,4 +76,5 @@ public class GossipManager {
 		int index = (int) Math.floor((Math.random() * nodes.size()));
 		return nodes.get(index);
 	}
+
 }

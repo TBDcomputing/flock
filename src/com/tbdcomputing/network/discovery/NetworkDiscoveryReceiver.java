@@ -7,8 +7,7 @@ import java.net.*;
 
 /**
  * This class listens for UDP broadcasts from any clients interested in gathering this node's information. It responds
- * with the listener's IP address and any other relevant information for the purpose of initiating gossip on the
- * broadcasting node.
+ * according to the behavior determined by the listener allowing us to customize the behavior easily.
  */
 public class NetworkDiscoveryReceiver implements Runnable {
 
@@ -18,16 +17,17 @@ public class NetworkDiscoveryReceiver implements Runnable {
     public NetworkDiscoveryReceiver(NetworkDiscoveryListener listener) throws SocketException {
         super();
         this.listener = listener;
+        // create the listening socket on our predetermined port
         this.socket = new DatagramSocket(Constants.PORT);
         this.socket.setReuseAddress(true);
     }
 
     /**
-     * Listens for a broadcast, and then responds with the listener's IP address and any other relevant gossip
-     * information.
+     * Listens for a broadcast, and calls onNodeDiscovered to determine the response behavior.
      */
     public void run() {
         try {
+            // TODO: set max size for buf in Constants, and use it here
             byte[] buf = new byte[1000];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
             socket.receive(packet);

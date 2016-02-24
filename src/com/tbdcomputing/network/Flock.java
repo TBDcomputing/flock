@@ -3,14 +3,18 @@ package com.tbdcomputing.network;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryBroadcaster;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryListener;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryReceiver;
-import jdk.nashorn.internal.ir.debug.JSONWriter;
+import com.tbdcomputing.network.gossip.GossipManager;
+import com.tbdcomputing.network.gossip.GossipNode;
 import org.json.JSONObject;
 
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.SocketException;
 
 /**
+ * The main class for the Flock software. This class should be run in order to begin the program. It will begin
+ * listening for new nodes as well as broadcast its information every once in a while. Probably will also have
+ * some input processing ala interactive mode so that the user can interact with the Flock.
+ * <p>
  * Created by akatkov on 2/22/16.
  */
 public class Flock {
@@ -19,21 +23,33 @@ public class Flock {
     private static NetworkDiscoveryListener basicListener = new NetworkDiscoveryListener() {
         @Override
         public void onNodeDiscovered(DatagramPacket packet) {
-            // read the uuid in, store the info about this node
-            System.out.println(String.format("Node Discovered: %s, Data: %s", packet.getAddress().getHostAddress(), new String(packet.getData())));
+            // parse packet as JSON data
+            GossipNode node = new GossipNode(new JSONObject(new String(packet.getData(), 0, packet.getLength())));
+            if (node.getUUID().equals(Constants.getUUID())) {
+                System.out.println("Discovered self...");
+            } else {
+                System.out.println("Other node: " + node);
+            }
         }
     };
     private static NetworkDiscoveryReceiver receiver;
     private static Thread broadcasterThread;
     private static NetworkDiscoveryBroadcaster broadcaster = new NetworkDiscoveryBroadcaster();
 
+    // stores information about the nodes including itself
+    private static GossipManager manager = new GossipManager();
+
     public static void main(String[] args) {
+
+        // set up the receiver with the listener
+        // throws a SocketException if we can't bind to the port
         try {
             receiver = new NetworkDiscoveryReceiver(basicListener);
         } catch (SocketException e) {
             e.printStackTrace();
             return;
         }
+        // continually listen for new nodes
         receiverThread = new CancellableThread() {
             @Override
             public void run() {
@@ -44,6 +60,7 @@ public class Flock {
         };
         receiverThread.start();
 
+        // broadcast our existence every 10 seconds
         broadcasterThread = new CancellableThread() {
             @Override
             public void run() {
@@ -59,6 +76,9 @@ public class Flock {
         };
         broadcasterThread.start();
 
+        // TODO: add way to cancel the above threads so that they can be joined below
+        // probably via some interactive mode
+
         try {
             receiverThread.join();
             broadcasterThread.join();
@@ -67,8 +87,13 @@ public class Flock {
         }
     }
 
+    /**
+     * Small extension of Thread so that we can cancel the inner loop of run easily, and
+     * let another thread join them.
+     */
     private static class CancellableThread extends Thread {
         protected volatile boolean isCancelled = false;
+
         public void cancel() {
             isCancelled = true;
         }
