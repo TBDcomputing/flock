@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import java.net.DatagramPacket;
 import java.net.SocketException;
+import java.util.Scanner;
 
 /**
  * The main class for the Flock software. This class should be run in order to begin the program. It will begin
@@ -18,7 +19,7 @@ import java.net.SocketException;
  */
 public class Flock {
 
-    private static Thread receiverThread;
+    private static CancellableThread receiverThread;
     private static NetworkDiscoveryListener basicListener = new NetworkDiscoveryListener() {
         @Override
         public void onNodeDiscovered(DatagramPacket packet) {
@@ -32,7 +33,7 @@ public class Flock {
         }
     };
     private static NetworkDiscoveryReceiver receiver;
-    private static Thread broadcasterThread;
+    private static CancellableThread broadcasterThread;
     private static NetworkDiscoveryBroadcaster broadcaster = new NetworkDiscoveryBroadcaster();
 
     public static void main(String[] args) {
@@ -74,12 +75,32 @@ public class Flock {
         // TODO: add way to cancel the above threads so that they can be joined below
         // probably via some interactive mode
 
-        try {
-            receiverThread.join();
-            broadcasterThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        Scanner cmdLine = new Scanner(System.in);
+        while (true) {
+            String cmd = cmdLine.nextLine();
+            if (cmd.toLowerCase().equals("quit")) {
+                // Stop the threads from running by calling cancel() and then joining them into the main thread
+                receiverThread.cancel();
+                broadcasterThread.cancel();
+
+                receiverThread.interrupt();
+                broadcasterThread.interrupt();
+
+                /*System.out.println(receiverThread.isInterrupted());
+                System.out.println(broadcasterThread.isInterrupted());*/
+
+                try {
+                    receiverThread.join();
+                    broadcasterThread.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                break;
+            }
         }
+
+        System.out.println("Node is exiting");
     }
 
     /**
