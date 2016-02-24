@@ -1,6 +1,8 @@
 package com.tbdcomputing.network.discovery;
 
 import com.tbdcomputing.network.Constants;
+import com.tbdcomputing.network.gossip.GossipManager;
+import com.tbdcomputing.network.gossip.GossipNode;
 import org.json.JSONObject;
 import org.omg.SendingContext.RunTime;
 import sun.security.provider.MD5;
@@ -79,6 +81,11 @@ public class NetworkDiscoveryBroadcaster implements Runnable {
 //
 //		return addresses;
 //	}
+    private GossipNode me;
+
+    public NetworkDiscoveryBroadcaster(GossipNode me) {
+        this.me = me;
+    }
 
     /**
      * Broadcasts its UUID to all the nodes on the network.
@@ -93,16 +100,7 @@ public class NetworkDiscoveryBroadcaster implements Runnable {
             sock.setBroadcast(true);
             sock.setSoTimeout(1000);
 
-            JSONObject json = new JSONObject();
-            String uuid = Constants.getUUID();
-            if (uuid == null) {
-                // TODO: better behavior for when no UUID can be generated
-                // probably means no mac address meaning no internet
-                throw new RuntimeException("Couldn't generate UUID");
-            }
-            json.put("id", uuid);
-            // TODO: add more data about this node to the JSONObject
-
+            JSONObject json = me.toJSON();
             byte[] buf = json.toString().getBytes();
             // set the destination to be our predetermined port
             DatagramPacket data = new DatagramPacket(buf, buf.length, addr, Constants.NETWORK_DISCOVERY_PORT);

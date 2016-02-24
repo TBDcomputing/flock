@@ -18,6 +18,8 @@ import java.net.SocketException;
  * Created by akatkov on 2/22/16.
  */
 public class Flock {
+    // stores information about the nodes including itself
+    private static GossipManager manager = new GossipManager();
 
     private static Thread receiverThread;
     private static NetworkDiscoveryListener basicListener = new NetworkDiscoveryListener() {
@@ -34,10 +36,7 @@ public class Flock {
     };
     private static NetworkDiscoveryReceiver receiver;
     private static Thread broadcasterThread;
-    private static NetworkDiscoveryBroadcaster broadcaster = new NetworkDiscoveryBroadcaster();
-
-    // stores information about the nodes including itself
-    private static GossipManager manager = new GossipManager();
+    private static NetworkDiscoveryBroadcaster broadcaster = new NetworkDiscoveryBroadcaster(manager.getMe());
 
     public static void main(String[] args) {
 
@@ -75,6 +74,8 @@ public class Flock {
             }
         };
         broadcasterThread.start();
+
+
 
         // TODO: add way to cancel the above threads so that they can be joined below
         // probably via some interactive mode

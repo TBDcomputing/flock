@@ -42,6 +42,13 @@ public class GossipNode {
         // TODO populate other fields as we populate the JSON
     }
 
+    public JSONObject toJSON() {
+        JSONObject obj = new JSONObject();
+        obj.put("id", uuid);
+        // TODO: add more data about this node to the JSONObject
+        return obj;
+    }
+
     @Override
     public String toString() {
         return "UUID: " + getUUID();

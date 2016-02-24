@@ -22,8 +22,8 @@ public class GossipManager {
 		nodes.add(me);
 	}
 
-	public void run() {
-
+	public GossipNode getMe() {
+        return me;
 	}
 
 	/**
