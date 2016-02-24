@@ -105,7 +105,7 @@ public class NetworkDiscoveryBroadcaster implements Runnable {
 
             byte[] buf = json.toString().getBytes();
             // set the destination to be our predetermined port
-            DatagramPacket data = new DatagramPacket(buf, buf.length, addr, Constants.PORT);
+            DatagramPacket data = new DatagramPacket(buf, buf.length, addr, Constants.NETWORK_DISCOVERY_PORT);
             sock.send(data);
             sock.close();
         } catch (UnknownHostException e) {
