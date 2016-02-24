@@ -18,7 +18,7 @@ public class NetworkDiscoveryReceiver implements Runnable {
         super();
         this.listener = listener;
         // create the listening socket on our predetermined port
-        this.socket = new DatagramSocket(Constants.PORT);
+        this.socket = new DatagramSocket(Constants.NETWORK_DISCOVERY_PORT);
         this.socket.setReuseAddress(true);
     }
 

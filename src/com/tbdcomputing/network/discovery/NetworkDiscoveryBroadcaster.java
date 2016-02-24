@@ -1,6 +1,8 @@
 package com.tbdcomputing.network.discovery;
 
 import com.tbdcomputing.network.Constants;
+import com.tbdcomputing.network.gossip.GossipManager;
+import com.tbdcomputing.network.gossip.GossipNode;
 import org.json.JSONObject;
 import org.omg.SendingContext.RunTime;
 import sun.security.provider.MD5;
@@ -15,18 +17,18 @@ import java.util.Scanner;
  * This class broadcasts to every other node on the network. Any node that responds will be running the listener. The
  * listening node will decide its response behavior according to the behavior implemented in its
  * NetworkDiscoveryListener.
- * 
+ *
  * @author drew
  */
 public class NetworkDiscoveryBroadcaster implements Runnable {
 
-	/**
-	 * Creates a list of IP addresses based on nodes that respond to the
-	 * broadcast. Any node that responds will be added to the list.
-	 * 
-	 * @return List of IP addresses that responded to the broadcast. Returns
-	 *         null if failed to complete broadcast.
-	 */
+    /**
+     * Creates a list of IP addresses based on nodes that respond to the
+     * broadcast. Any node that responds will be added to the list.
+     *
+     * @return List of IP addresses that responded to the broadcast. Returns
+     *         null if failed to complete broadcast.
+     */
 //	public List<String> findHosts() {
 //		InetAddress addr;
 //		ArrayList<String> addresses = new ArrayList<String>();
@@ -79,41 +81,37 @@ public class NetworkDiscoveryBroadcaster implements Runnable {
 //
 //		return addresses;
 //	}
+    private GossipNode me;
 
-	/**
-	 * Broadcasts its UUID to all the nodes on the network.
-	 */
-	@Override
-	public void run() {
-		try {
-			InetAddress addr = InetAddress.getByName(Constants.BROADCAST_ADDRESS);
+    public NetworkDiscoveryBroadcaster(GossipNode me) {
+        this.me = me;
+    }
 
-			// don't need to use our port for broadcasting our node's information
-			DatagramSocket sock = new DatagramSocket();
-			sock.setBroadcast(true);
-			sock.setSoTimeout(1000);
+    /**
+     * Broadcasts its UUID to all the nodes on the network.
+     */
+    @Override
+    public void run() {
+        try {
+            InetAddress addr = InetAddress.getByName(Constants.BROADCAST_ADDRESS);
 
-			JSONObject json = new JSONObject();
-			String uuid = Constants.getUUID();
-			if (uuid == null) {
-				// TODO: better behavior for when no UUID can be generated
-				// probably means no mac address meaning no internet
-				throw new RuntimeException("Couldn't generate UUID");
-			}
-			json.put("id", uuid);
-			// TODO: add more data about this node to the JSONObject
+            // don't need to use our port for broadcasting our node's information
+            DatagramSocket sock = new DatagramSocket();
+            sock.setBroadcast(true);
+            sock.setSoTimeout(1000);
 
-			byte[] buf = json.toString().getBytes();
-			// set the destination to be our predetermined port
-			DatagramPacket data = new DatagramPacket(buf, buf.length, addr, Constants.PORT);
-			sock.send(data);
-			sock.close();
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (SocketException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+            JSONObject json = me.toJSON();
+            byte[] buf = json.toString().getBytes();
+            // set the destination to be our predetermined port
+            DatagramPacket data = new DatagramPacket(buf, buf.length, addr, Constants.NETWORK_DISCOVERY_PORT);
+            sock.send(data);
+            sock.close();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (SocketException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

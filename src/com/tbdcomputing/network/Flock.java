@@ -3,6 +3,7 @@ package com.tbdcomputing.network;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryBroadcaster;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryListener;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryReceiver;
+import com.tbdcomputing.network.gossip.GossipManager;
 import com.tbdcomputing.network.gossip.GossipNode;
 import org.json.JSONObject;
 
@@ -14,17 +15,19 @@ import java.util.Scanner;
  * The main class for the Flock software. This class should be run in order to begin the program. It will begin
  * listening for new nodes as well as broadcast its information every once in a while. Probably will also have
  * some input processing ala interactive mode so that the user can interact with the Flock.
- *
+ * <p>
  * Created by akatkov on 2/22/16.
  */
 public class Flock {
+    // stores information about the nodes including itself
+    private static GossipManager manager = new GossipManager();
 
     private static CancellableThread receiverThread;
     private static NetworkDiscoveryListener basicListener = new NetworkDiscoveryListener() {
         @Override
         public void onNodeDiscovered(DatagramPacket packet) {
             // parse packet as JSON data
-            GossipNode node = new GossipNode(new JSONObject(new String(packet.getData())));
+            GossipNode node = new GossipNode(new JSONObject(new String(packet.getData(), 0, packet.getLength())));
             if (node.getUUID().equals(Constants.getUUID())) {
                 System.out.println("Discovered self...");
             } else {
@@ -34,9 +37,10 @@ public class Flock {
     };
     private static NetworkDiscoveryReceiver receiver;
     private static CancellableThread broadcasterThread;
-    private static NetworkDiscoveryBroadcaster broadcaster = new NetworkDiscoveryBroadcaster();
+    private static NetworkDiscoveryBroadcaster broadcaster = new NetworkDiscoveryBroadcaster(manager.getMe());
 
     public static void main(String[] args) {
+
         // set up the receiver with the listener
         // throws a SocketException if we can't bind to the port
         try {
@@ -72,6 +76,8 @@ public class Flock {
         };
         broadcasterThread.start();
 
+
+
         // TODO: add way to cancel the above threads so that they can be joined below
         // probably via some interactive mode
 
@@ -99,8 +105,6 @@ public class Flock {
                 break;
             }
         }
-
-        System.out.println("Node is exiting");
     }
 
     /**
@@ -109,6 +113,7 @@ public class Flock {
      */
     private static class CancellableThread extends Thread {
         protected volatile boolean isCancelled = false;
+
         public void cancel() {
             isCancelled = true;
         }
