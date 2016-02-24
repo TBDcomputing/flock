@@ -13,7 +13,7 @@ import java.net.SocketException;
  * The main class for the Flock software. This class should be run in order to begin the program. It will begin
  * listening for new nodes as well as broadcast its information every once in a while. Probably will also have
  * some input processing ala interactive mode so that the user can interact with the Flock.
- *
+ * <p>
  * Created by akatkov on 2/22/16.
  */
 public class Flock {
@@ -23,7 +23,7 @@ public class Flock {
         @Override
         public void onNodeDiscovered(DatagramPacket packet) {
             // parse packet as JSON data
-            GossipNode node = new GossipNode(new JSONObject(new String(packet.getData())));
+            GossipNode node = new GossipNode(new JSONObject(new String(packet.getData(), 0, packet.getLength())));
             if (node.getUUID().equals(Constants.getUUID())) {
                 System.out.println("Discovered self...");
             } else {
@@ -88,6 +88,7 @@ public class Flock {
      */
     private static class CancellableThread extends Thread {
         protected volatile boolean isCancelled = false;
+
         public void cancel() {
             isCancelled = true;
         }
