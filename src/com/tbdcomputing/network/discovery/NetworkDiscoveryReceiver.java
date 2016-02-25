@@ -21,6 +21,7 @@ public class NetworkDiscoveryReceiver extends Thread implements Runnable {
         try {
             this.socket = new DatagramSocket(Constants.NETWORK_DISCOVERY_PORT);
             this.socket.setReuseAddress(true);
+            this.socket.setSoTimeout(4000);
         } catch (SocketException e) {
             e.printStackTrace();
         }
@@ -32,29 +33,25 @@ public class NetworkDiscoveryReceiver extends Thread implements Runnable {
      */
     public void run() {
         try {
-            //TODO why isn't this in a while loop whereas it's cancellable thread is in a while loop? More importantly, we never close() socket....
-            // TODO: set max size for buf in Constants, and use it here
-
-
+            //TODO: set max size for buf in Constants, and use it here
             byte[] buf = new byte[1000];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
             socket.receive(packet);
             listener.onNodeDiscovered(packet);
-        }  catch (SocketException e) {
-            System.out.println("socket exception ignoring for now see TODO");
-            //TODO receiver interrupt from 'quit' cmd throws a socket exception because of socket.close how to fix this?
+            //TODO why aren't we just closing the socket here instead of using interrupt signals? xyz
+        } catch (SocketTimeoutException ste) {
+            System.out.println("receiver socket timed out"); //TODO do we need to print this stacktrace?
+            ste.printStackTrace();
+        } catch (SocketException e) {
             e.printStackTrace();
         } catch (IOException e) {
-            System.out.println("regularexceptionxyz");
             e.printStackTrace();
         }
     }
 
     @Override
     public void interrupt() {
-//        socket.disconnect(); //this just blocks forever, no idea
         super.interrupt();
         socket.close();
-
     }
 }

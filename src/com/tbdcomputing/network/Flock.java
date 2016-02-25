@@ -51,16 +51,12 @@ public class Flock {
                 while (!isCancelled) {
                     receiver.run();
                 }
-            }
-            @Override
-            public void interrupt(){
                 receiver.interrupt();
                 try {
                     receiver.join();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                super.interrupt();
             }
         };
         receiverThread.start();
@@ -84,26 +80,23 @@ public class Flock {
         broadcasterThread.start();
 
 
-
-        // TODO: add way to cancel the above threads so that they can be joined below
-        // probably via some interactive mode
+        //TODO add a startup command probably with apache cli and then also a preferences object
 
         Scanner cmdLine = new Scanner(System.in);
         while (true) {
             String cmd = cmdLine.nextLine();
             if (cmd.toLowerCase().equals("quit")) {
-                // Stop the threads from running by calling cancel() and then joining them into the main thread
+                System.out.println("system shutting down...");
+                // Stop the cancellable thread wrappers and then join them
                 receiverThread.cancel();
                 broadcasterThread.cancel();
-                receiverThread.interrupt(); //TODO kill all threads related to both CancellableThread and receiver
-                broadcasterThread.interrupt(); //TODO kill all threads related to both BroadcasterThread and receiver
                 try {
                     receiverThread.join();
                     broadcasterThread.join();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
+                System.out.println("System shutdown complete, later tater!");
                 break;
             }
         }
@@ -112,6 +105,8 @@ public class Flock {
     /**
      * Small extension of Thread so that we can cancel the inner loop of run easily, and
      * let another thread join them.
+     *
+     * Must join the underlying thread which this wraps around.
      */
     private static class CancellableThread extends Thread {
         protected volatile boolean isCancelled = false;
