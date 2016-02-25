@@ -14,12 +14,17 @@ public class NetworkDiscoveryReceiver extends Thread implements Runnable {
     private NetworkDiscoveryListener listener;
     private DatagramSocket socket;
 
-    public NetworkDiscoveryReceiver(NetworkDiscoveryListener listener) throws SocketException {
+    public NetworkDiscoveryReceiver(NetworkDiscoveryListener listener){
         super();
         this.listener = listener;
         // create the listening socket on our predetermined port
-        this.socket = new DatagramSocket(Constants.NETWORK_DISCOVERY_PORT);
-        this.socket.setReuseAddress(true);
+        try {
+            this.socket = new DatagramSocket(Constants.NETWORK_DISCOVERY_PORT);
+            this.socket.setReuseAddress(true);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**
@@ -29,19 +34,27 @@ public class NetworkDiscoveryReceiver extends Thread implements Runnable {
         try {
             //TODO why isn't this in a while loop whereas it's cancellable thread is in a while loop? More importantly, we never close() socket....
             // TODO: set max size for buf in Constants, and use it here
+
+
             byte[] buf = new byte[1000];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
             socket.receive(packet);
             listener.onNodeDiscovered(packet);
+        }  catch (SocketException e) {
+            System.out.println("socket exception ignoring for now see TODO");
+            //TODO receiver interrupt from 'quit' cmd throws a socket exception because of socket.close how to fix this?
+            e.printStackTrace();
         } catch (IOException e) {
+            System.out.println("regularexceptionxyz");
             e.printStackTrace();
         }
     }
 
     @Override
     public void interrupt() {
-//        socket.disconnect(); //without this, it would throw a socket error, but it also blocks forever...
-        socket.close();
+//        socket.disconnect(); //this just blocks forever, no idea
         super.interrupt();
+        socket.close();
+
     }
 }

@@ -43,12 +43,7 @@ public class Flock {
 
         // set up the receiver with the listener
         // throws a SocketException if we can't bind to the port
-        try {
-            receiver = new NetworkDiscoveryReceiver(basicListener);
-        } catch (SocketException e) {
-            e.printStackTrace();
-            return;
-        }
+        receiver = new NetworkDiscoveryReceiver(basicListener);
         // continually listen for new nodes
         receiverThread = new CancellableThread() {
             @Override
@@ -70,21 +65,23 @@ public class Flock {
         };
         receiverThread.start();
 
-        // broadcast our existence every 10 seconds
-//        broadcasterThread = new CancellableThread() {
-//            @Override
-//            public void run() {
-//                while (!isCancelled) {
-//                    broadcaster.run();
-//                    try {
-//                        Thread.sleep(10000);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//        };
-//        broadcasterThread.start();
+//         broadcast our existence every 10 seconds
+        broadcasterThread = new CancellableThread() {
+            @Override
+            public void run() {
+                while (!isCancelled) {
+                    broadcaster.run();
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        System.out.println("interrupted exception ignoring for now see TODO");
+                        //TODO broadcaster interrupt from 'quit' cmd causes interruption of thread.sleep
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        broadcasterThread.start();
 
 
 
@@ -97,14 +94,12 @@ public class Flock {
             if (cmd.toLowerCase().equals("quit")) {
                 // Stop the threads from running by calling cancel() and then joining them into the main thread
                 receiverThread.cancel();
-//                broadcasterThread.cancel();
+                broadcasterThread.cancel();
                 receiverThread.interrupt(); //TODO kill all threads related to both CancellableThread and receiver
-//                broadcasterThread.interrupt(); //TODO kill all threads related to both BroadcasterThread and receiver
-
+                broadcasterThread.interrupt(); //TODO kill all threads related to both BroadcasterThread and receiver
                 try {
-
                     receiverThread.join();
-//                    broadcasterThread.join();
+                    broadcasterThread.join();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
