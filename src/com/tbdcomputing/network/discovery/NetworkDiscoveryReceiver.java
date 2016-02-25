@@ -9,7 +9,7 @@ import java.net.*;
  * This class listens for UDP broadcasts from any clients interested in gathering this node's information. It responds
  * according to the behavior determined by the listener allowing us to customize the behavior easily.
  */
-public class NetworkDiscoveryReceiver implements Runnable {
+public class NetworkDiscoveryReceiver extends Thread implements Runnable {
 
     private NetworkDiscoveryListener listener;
     private DatagramSocket socket;
@@ -27,6 +27,7 @@ public class NetworkDiscoveryReceiver implements Runnable {
      */
     public void run() {
         try {
+            //TODO why isn't this in a while loop whereas it's cancellable thread is in a while loop? More importantly, we never close() socket....
             // TODO: set max size for buf in Constants, and use it here
             byte[] buf = new byte[1000];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
@@ -35,5 +36,12 @@ public class NetworkDiscoveryReceiver implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void interrupt() {
+//        socket.disconnect(); //without this, it would throw a socket error, but it also blocks forever...
+        socket.close();
+        super.interrupt();
     }
 }
