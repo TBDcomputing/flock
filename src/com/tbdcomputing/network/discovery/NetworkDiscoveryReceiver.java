@@ -9,17 +9,23 @@ import java.net.*;
  * This class listens for UDP broadcasts from any clients interested in gathering this node's information. It responds
  * according to the behavior determined by the listener allowing us to customize the behavior easily.
  */
-public class NetworkDiscoveryReceiver implements Runnable {
+public class NetworkDiscoveryReceiver extends Thread implements Runnable {
 
     private NetworkDiscoveryListener listener;
     private DatagramSocket socket;
 
-    public NetworkDiscoveryReceiver(NetworkDiscoveryListener listener) throws SocketException {
+    public NetworkDiscoveryReceiver(NetworkDiscoveryListener listener){
         super();
         this.listener = listener;
         // create the listening socket on our predetermined port
-        this.socket = new DatagramSocket(Constants.NETWORK_DISCOVERY_PORT);
-        this.socket.setReuseAddress(true);
+        try {
+            this.socket = new DatagramSocket(Constants.NETWORK_DISCOVERY_PORT);
+            this.socket.setReuseAddress(true);
+            this.socket.setSoTimeout(4000);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**
@@ -27,13 +33,27 @@ public class NetworkDiscoveryReceiver implements Runnable {
      */
     public void run() {
         try {
-            // TODO: set max size for buf in Constants, and use it here
+            //TODO: set max size for buf in Constants, and use it here
             byte[] buf = new byte[1000];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
             socket.receive(packet);
             listener.onNodeDiscovered(packet);
+            //TODO why aren't we just closing the socket here instead of using interrupt signals, or why do we do it the other way in broadcaster?
+        } catch (SocketTimeoutException ste) {
+            //TODO log at warning level once a logger is implemented
+        } catch (SocketException e) {
+            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Closes the socket on system shutdown
+     */
+    @Override
+    public void interrupt() {
+        super.interrupt();
+        socket.close();
     }
 }

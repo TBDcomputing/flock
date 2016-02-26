@@ -43,12 +43,7 @@ public class Flock {
 
         // set up the receiver with the listener
         // throws a SocketException if we can't bind to the port
-        try {
-            receiver = new NetworkDiscoveryReceiver(basicListener);
-        } catch (SocketException e) {
-            e.printStackTrace();
-            return;
-        }
+        receiver = new NetworkDiscoveryReceiver(basicListener);
         // continually listen for new nodes
         receiverThread = new CancellableThread() {
             @Override
@@ -56,18 +51,24 @@ public class Flock {
                 while (!isCancelled) {
                     receiver.run();
                 }
+                receiver.interrupt();
+                try {
+                    receiver.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         };
         receiverThread.start();
 
-        // broadcast our existence every 10 seconds
+//         broadcast our existence every 10 seconds
         broadcasterThread = new CancellableThread() {
             @Override
             public void run() {
                 while (!isCancelled) {
                     broadcaster.run();
                     try {
-                        Thread.sleep(10000);
+                        Thread.sleep(5000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -77,31 +78,22 @@ public class Flock {
         broadcasterThread.start();
 
 
-
-        // TODO: add way to cancel the above threads so that they can be joined below
-        // probably via some interactive mode
-
+        //TODO add a startup command probably with apache cli and then also a preferences object
         Scanner cmdLine = new Scanner(System.in);
         while (true) {
             String cmd = cmdLine.nextLine();
             if (cmd.toLowerCase().equals("quit")) {
-                // Stop the threads from running by calling cancel() and then joining them into the main thread
+                System.out.println("system shutting down...");
+                // Stop the cancellable thread wrappers and then join them
                 receiverThread.cancel();
                 broadcasterThread.cancel();
-
-                receiverThread.interrupt();
-                broadcasterThread.interrupt();
-
-                /*System.out.println(receiverThread.isInterrupted());
-                System.out.println(broadcasterThread.isInterrupted());*/
-
                 try {
                     receiverThread.join();
                     broadcasterThread.join();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
+                System.out.println("System shutdown complete, later tater!");
                 break;
             }
         }
@@ -110,6 +102,8 @@ public class Flock {
     /**
      * Small extension of Thread so that we can cancel the inner loop of run easily, and
      * let another thread join them.
+     *
+     * Must join the underlying thread which this wraps around.
      */
     private static class CancellableThread extends Thread {
         protected volatile boolean isCancelled = false;
