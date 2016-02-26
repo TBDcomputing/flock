@@ -38,10 +38,9 @@ public class NetworkDiscoveryReceiver extends Thread implements Runnable {
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
             socket.receive(packet);
             listener.onNodeDiscovered(packet);
-            //TODO why aren't we just closing the socket here instead of using interrupt signals? xyz
+            //TODO why aren't we just closing the socket here instead of using interrupt signals, or why do we do it the other way in broadcaster?
         } catch (SocketTimeoutException ste) {
-            System.out.println("receiver socket timed out"); //TODO do we need to print this stacktrace?
-            ste.printStackTrace();
+            //TODO log at warning level once a logger is implemented
         } catch (SocketException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -49,6 +48,9 @@ public class NetworkDiscoveryReceiver extends Thread implements Runnable {
         }
     }
 
+    /**
+     * Closes the socket on system shutdown
+     */
     @Override
     public void interrupt() {
         super.interrupt();

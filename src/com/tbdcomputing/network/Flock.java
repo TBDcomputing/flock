@@ -70,8 +70,6 @@ public class Flock {
                     try {
                         Thread.sleep(5000);
                     } catch (InterruptedException e) {
-                        System.out.println("interrupted exception ignoring for now see TODO");
-                        //TODO broadcaster interrupt from 'quit' cmd causes interruption of thread.sleep
                         e.printStackTrace();
                     }
                 }
@@ -81,7 +79,6 @@ public class Flock {
 
 
         //TODO add a startup command probably with apache cli and then also a preferences object
-
         Scanner cmdLine = new Scanner(System.in);
         while (true) {
             String cmd = cmdLine.nextLine();
