@@ -59,6 +59,7 @@ public class GossipManager {
                 diffNodes.add((GossipNode)receivedNodes.get(i));
             }
 
+            // TODO: Merge node lists
 		
 		} catch (SocketException e) {
 			e.printStackTrace();
@@ -76,5 +77,7 @@ public class GossipManager {
 		int index = (int) Math.floor((Math.random() * nodes.size()));
 		return nodes.get(index);
 	}
+
+
 
 }

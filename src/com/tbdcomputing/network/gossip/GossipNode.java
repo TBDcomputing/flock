@@ -49,6 +49,13 @@ public class GossipNode {
         return obj;
     }
 
+    public void update(GossipNode other) {
+        this.addr = other.getAddr();
+        this.heartbeat = other.getHeartbeat();
+        this.generationTime = other.getGenerationTime();
+        this.status = other.status;
+    }
+
     @Override
     public String toString() {
         return "UUID: " + getUUID();
