@@ -66,7 +66,7 @@ public class GossipManager {
             }
 
             // Merge node lists.
-            GossipListUtils.mergeList(nodes, otherNodes);
+            GossipListUtils.mergeList(nodes, otherNodes, nodeMap);
 
 		} catch (SocketException e) {
 			e.printStackTrace();

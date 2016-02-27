@@ -83,7 +83,7 @@ public class GossipListUtils {
         return nodes;
     }
 
-    
+
     /**
      * Finds the node with the following UUID in our list of nodes.
      * @param uuid  The UUID to search for.
