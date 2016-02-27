@@ -2,11 +2,13 @@ package com.tbdcomputing.network.gossip;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 
 import com.tbdcomputing.network.Constants;
+import com.tbdcomputing.network.utils.GossipListUtils;
 import org.json.JSONArray;
 
 /**
@@ -14,12 +16,16 @@ import org.json.JSONArray;
  */
 public class GossipManager {
 	private List<GossipNode> nodes;
+    private HashMap<String, GossipNode> nodeMap;
 	private GossipNode me;
 
 	public GossipManager() {
 		nodes = Collections.synchronizedList(new ArrayList<GossipNode>());
+        nodeMap = new HashMap<String, GossipNode>();
         me = new GossipNode();
 		nodes.add(me);
+        nodeMap.put(me.getUUID(), me);
+
 	}
 
 	public GossipNode getMe() {
@@ -53,14 +59,15 @@ public class GossipManager {
             JSONArray receivedNodes = new JSONArray(data);
 			
 			// Update our list with the received list
-            ArrayList<GossipNode> diffNodes = new ArrayList<GossipNode>();
+            ArrayList<GossipNode> otherNodes = new ArrayList<GossipNode>();
 
             for(int i = 0; i < receivedNodes.length(); i++) {
-                diffNodes.add((GossipNode)receivedNodes.get(i));
+                otherNodes.add((GossipNode)receivedNodes.get(i));
             }
 
-            // TODO: Merge node lists
-		
+            // Merge node lists.
+            GossipListUtils.mergeList(nodes, otherNodes);
+
 		} catch (SocketException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -77,6 +84,33 @@ public class GossipManager {
 		int index = (int) Math.floor((Math.random() * nodes.size()));
 		return nodes.get(index);
 	}
+
+    /**
+     * Get a node by its uuid.
+     * @param uuid The UUID to search for.
+     * @return  A GossipNode that contains the given UUID, null if not found.
+     */
+    public GossipNode getGossipNodeByUUID(String uuid) {
+        return nodeMap.get(uuid);
+    }
+
+    /**
+     * Add a node to the list of nodes and the map.
+     * @param node  The node to add.
+     */
+    public void addNode(GossipNode node) {
+        nodes.add(node);
+        nodeMap.put(node.getUUID(), node);
+    }
+
+    /**
+     * Remove a node by it's UUID.
+     * @param uuid  The UUID corresponding to the removed node.
+     */
+    public void removeNodeByUUID(String uuid) {
+        GossipNode node = nodeMap.remove(uuid);
+        nodes.remove(node);
+    }
 
 
 

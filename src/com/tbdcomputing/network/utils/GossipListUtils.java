@@ -3,6 +3,7 @@ package com.tbdcomputing.network.utils;
 import com.tbdcomputing.network.gossip.GossipNode;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -13,10 +14,10 @@ public class GossipListUtils {
      * Merge the other list of @GossipNode in to our list of gossip nodes comparing based on generation time and heartbeat data.
      * @param otherList
      */
-    public void mergeList(List<GossipNode> ourList, List<GossipNode> otherList) {
+    public static void mergeList(List<GossipNode> ourList, List<GossipNode> otherList, HashMap<String, GossipNode> map) {
         for(GossipNode node: otherList) {
             // Find corresponding node in our list
-            GossipNode ourNode = findNodeByUUID(node.getUUID(), ourList);
+            GossipNode ourNode = findNodeByUUID(node.getUUID(), map);
 
             if(ourNode != null) {
                 // If it is in our list, choose the more up to date one
@@ -46,11 +47,11 @@ public class GossipListUtils {
      * @param otherList The list of nodes to compare to.
      * @return          A list of all nodes that differ between the two lists.
      */
-    public List<GossipNode> generateDiffList(List<GossipNode> ourList, List<GossipNode> otherList) {
+    public static List<GossipNode> generateDiffList(List<GossipNode> ourList, List<GossipNode> otherList, HashMap<String, GossipNode> map) {
         List<GossipNode> nodes = new ArrayList<GossipNode>();
 
         for(GossipNode node : otherList) {
-            GossipNode ourNode = findNodeByUUID(node.getUUID(), ourList);
+            GossipNode ourNode = findNodeByUUID(node.getUUID(), map);
 
             if(ourNode != null) {
                 if(ourNode.getGenerationTime() < node.getGenerationTime()) {
@@ -82,22 +83,15 @@ public class GossipListUtils {
         return nodes;
     }
 
-
-    // TODO: create GossipList class which has a HashTable mapping UUID to nodes in our synchronized arraylist.  This allows us to search very efficiently and get nodes from our list in constant time for updates, etc.
-
+    
     /**
      * Finds the node with the following UUID in our list of nodes.
      * @param uuid  The UUID to search for.
-     * @param ourList   The list to search in.
+     * @param nodeHashMap   The map to search in.
      * @return  The node that possesses that uuid or null if it is not in the list.
      */
-    public GossipNode findNodeByUUID(String uuid, List<GossipNode> ourList) {
-        for(GossipNode node : ourList) {
-            if(uuid.equals(node.getUUID())) {
-                return node;
-            }
-        }
-        return null;
+    public static GossipNode findNodeByUUID(String uuid, HashMap<String, GossipNode> nodeHashMap) {
+        return nodeHashMap.get(uuid);
     }
 
 }
