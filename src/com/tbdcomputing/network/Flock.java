@@ -19,6 +19,9 @@ import java.util.Scanner;
  * Created by akatkov on 2/22/16.
  */
 public class Flock {
+
+    private static boolean running = false;
+
     // stores information about the nodes including itself
     private static GossipManager manager = new GossipManager();
 
@@ -41,6 +44,31 @@ public class Flock {
 
     public static void main(String[] args) {
 
+        //TODO add a startup command probably with apache cli and then also a preferences object
+        Scanner cmdLine = new Scanner(System.in);
+        while (true) {
+            String cmd = cmdLine.nextLine();
+            if (cmd.toLowerCase().equals("start")) {
+                running = true;
+                run();
+            } else if (cmd.toLowerCase().equals("quit") && running) {
+                System.out.println("system shutting down...");
+                // Stop the cancellable thread wrappers and then join them
+                receiverThread.cancel();
+                broadcasterThread.cancel();
+                try {
+                    receiverThread.join();
+                    broadcasterThread.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("System shutdown complete, later tater!");
+                break;
+            }
+        }
+    }
+
+    private static void run() {
         // set up the receiver with the listener
         // throws a SocketException if we can't bind to the port
         receiver = new NetworkDiscoveryReceiver(basicListener);
@@ -76,27 +104,6 @@ public class Flock {
             }
         };
         broadcasterThread.start();
-
-
-        //TODO add a startup command probably with apache cli and then also a preferences object
-        Scanner cmdLine = new Scanner(System.in);
-        while (true) {
-            String cmd = cmdLine.nextLine();
-            if (cmd.toLowerCase().equals("quit")) {
-                System.out.println("system shutting down...");
-                // Stop the cancellable thread wrappers and then join them
-                receiverThread.cancel();
-                broadcasterThread.cancel();
-                try {
-                    receiverThread.join();
-                    broadcasterThread.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                System.out.println("System shutdown complete, later tater!");
-                break;
-            }
-        }
     }
 
     /**
