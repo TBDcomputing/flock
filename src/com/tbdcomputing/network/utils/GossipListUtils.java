@@ -2,6 +2,7 @@ package com.tbdcomputing.network.utils;
 
 import com.tbdcomputing.network.gossip.GossipNode;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,6 +38,48 @@ public class GossipListUtils {
             }
 
         }
+    }
+
+    /**
+     * Generate the list of all nodes that differ between two lists.
+     * @param ourList   Our list of nodes.
+     * @param otherList The list of nodes to compare to.
+     * @return          A list of all nodes that differ between the two lists.
+     */
+    public List<GossipNode> generateDiffList(List<GossipNode> ourList, List<GossipNode> otherList) {
+        List<GossipNode> nodes = new ArrayList<GossipNode>();
+
+        for(GossipNode node : otherList) {
+            GossipNode ourNode = findNodeByUUID(node.getUUID(), ourList);
+
+            if(ourNode != null) {
+                if(ourNode.getGenerationTime() < node.getGenerationTime()) {
+                    // The node went down, and other node is more up to date.
+                    nodes.add(node);
+                } else if(ourNode.getGenerationTime() == node.getGenerationTime()) {
+                    // The node never went down, check heart beat
+                    // keep ours if heartbeats are the same or ours is greater.
+                    if(ourNode.getHeartbeat() < node.getHeartbeat()) {
+                        nodes.add(node);
+                    } else if (ourNode.getHeartbeat() > node.getHeartbeat()) {
+                        nodes.add(ourNode);
+                    }
+                } else {
+                    nodes.add(ourNode);
+                }
+            } else {
+                nodes.add(node);
+            }
+
+        }
+
+        for(GossipNode node : ourList) {
+            if(!nodes.contains(node)) {
+                nodes.add(node);
+            }
+        }
+
+        return nodes;
     }
 
 
