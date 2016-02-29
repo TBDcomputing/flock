@@ -32,6 +32,51 @@ public class GossipManager {
         return me;
 	}
 
+    /**
+     * Receive a list of nodes, update our nodes accordingly and send back a list of nodes to update the sender with.
+     */
+    public void receiveNodeList() {
+        try {
+            // Create a socket and allow reuse.
+            DatagramSocket socket = new DatagramSocket(Constants.GOSSIP_RECEIVE_PORT);
+            socket.setReuseAddress(true);
+
+            // Receive the list of nodes.
+            byte[] buf = new byte[10240];
+            DatagramPacket packet = new DatagramPacket(buf, buf.length);
+            socket.receive(packet);
+
+            // Get the node list out of received packet.
+            String data = new String(packet.getData(), 0, packet.getLength());
+            JSONArray receivedNodes = new JSONArray(data);
+
+            // Update our list with the received list
+            ArrayList<GossipNode> otherNodes = new ArrayList<GossipNode>();
+
+            for(int i = 0; i < receivedNodes.length(); i++) {
+                otherNodes.add((GossipNode)receivedNodes.get(i));
+            }
+
+            // Generate the diff list of nodes.
+            List<GossipNode> diffNodes = GossipListUtils.generateDiffList(nodes, otherNodes, nodeMap);
+
+            // Merge our list with the diff list.
+            GossipListUtils.mergeList(nodes, diffNodes, nodeMap);
+
+            // Send the diff list back to the other node.
+            JSONArray json = new JSONArray(diffNodes);
+            buf = json.toString().getBytes();
+
+            socket.send(new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort()));
+
+            socket.close();
+        } catch (SocketException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 	/**
 	 * Send our list of nodes to a random other node.
 	 */
@@ -68,6 +113,7 @@ public class GossipManager {
             // Merge node lists.
             GossipListUtils.mergeList(nodes, otherNodes, nodeMap);
 
+            socket.close();
 		} catch (SocketException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

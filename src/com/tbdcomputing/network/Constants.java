@@ -12,6 +12,7 @@ public class Constants {
     public static final int NETWORK_DISCOVERY_PORT = 8888;
     public static final String BROADCAST_ADDRESS = "255.255.255.255";
     public static final int GOSSIP_PORT = 8889;
+    public static final int GOSSIP_RECEIVE_PORT = 8890;
 
     public static String getUUID() {
         try {
