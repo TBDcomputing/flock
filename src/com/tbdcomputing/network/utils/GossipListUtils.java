@@ -1,5 +1,6 @@
 package com.tbdcomputing.network.utils;
 
+import com.tbdcomputing.network.Constants;
 import com.tbdcomputing.network.gossip.GossipNode;
 
 import java.util.ArrayList;
@@ -16,6 +17,10 @@ public class GossipListUtils {
      */
     public static void mergeList(List<GossipNode> ourList, List<GossipNode> otherList, HashMap<String, GossipNode> map) {
         for(GossipNode node: otherList) {
+            if (node.getUUID().equals(Constants.getUUID())) {
+                continue;
+            }
+
             // Find corresponding node in our list
             GossipNode ourNode = findNodeByUUID(node.getUUID(), map);
 
