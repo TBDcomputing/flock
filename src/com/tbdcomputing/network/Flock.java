@@ -46,6 +46,7 @@ public class Flock {
                 System.out.println("Discovered self...");
             } else {
                 System.out.println("Other node: " + node);
+                manager.addNode(node);
             }
         }
     };
