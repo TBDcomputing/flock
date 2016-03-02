@@ -59,7 +59,7 @@ public class GossipReceiver {
             GossipListUtils.mergeList(nodes, diffNodes, nodeMap);
 
             // Send the diff list back to the other node.
-            JSONArray json = new JSONArray(diffNodes);
+            JSONArray json = new JSONArray(diffNodes.parallelStream().map(GossipNode::toJSON).toArray());
             buf = json.toString().getBytes();
 
             socket.send(new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort()));
