@@ -48,7 +48,7 @@ public class GossipReceiver {
             ArrayList<GossipNode> otherNodes = new ArrayList<GossipNode>();
 
             for (int i = 0; i < receivedNodes.length(); i++) {
-                otherNodes.add((GossipNode) receivedNodes.get(i));
+                otherNodes.add(new GossipNode(receivedNodes.getJSONObject(i)));
             }
 
             // Generate the diff list of nodes.

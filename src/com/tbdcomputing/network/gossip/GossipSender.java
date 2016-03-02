@@ -41,7 +41,7 @@ public class GossipSender {
     public void sendNodeList(GossipNode other) {
 
         try {
-            DatagramSocket socket = new DatagramSocket(Constants.GOSSIP_PORT, other.getAddr());
+            DatagramSocket socket = new DatagramSocket();
             DatagramPacket packet;
             byte[] buf;
 
@@ -51,7 +51,7 @@ public class GossipSender {
             // Serialize and send our entire list of nodes
             JSONArray json = new JSONArray(nodes);
             buf = json.toString().getBytes();
-            packet = new DatagramPacket(buf, buf.length);
+            packet = new DatagramPacket(buf, buf.length, other.getAddr(), Constants.GOSSIP_RECEIVE_PORT);
 
             socket.send(packet);
 
@@ -67,7 +67,7 @@ public class GossipSender {
             ArrayList<GossipNode> otherNodes = new ArrayList<GossipNode>();
 
             for (int i = 0; i < receivedNodes.length(); i++) {
-                otherNodes.add((GossipNode) receivedNodes.get(i));
+                otherNodes.add(new GossipNode(receivedNodes.getJSONObject(i)));
             }
 
             // Merge node lists.
