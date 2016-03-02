@@ -24,6 +24,8 @@ public class GossipSender {
     }
 
     public void gossip() {
+        System.out.println("Gossiping: " + manager.getNodes());
+
         GossipNode me = manager.getMe();
 
         me.setHeartbeat(me.getHeartbeat() + 1);

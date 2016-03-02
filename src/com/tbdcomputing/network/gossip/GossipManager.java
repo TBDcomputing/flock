@@ -50,8 +50,10 @@ public class GossipManager {
      * @param node The node to add.
      */
     public void addNode(GossipNode node) {
-        nodes.add(node);
-        nodeMap.put(node.getUUID(), node);
+        if (!nodeMap.containsKey(node.getUUID())) {
+            nodes.add(node);
+            nodeMap.put(node.getUUID(), node);
+        }
     }
 
     /**
