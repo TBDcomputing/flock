@@ -43,6 +43,7 @@ public class GossipReceiver {
             // Get the node list out of received packet.
             String data = new String(packet.getData(), 0, packet.getLength());
             JSONArray receivedNodes = new JSONArray(data);
+            System.out.println("receivedNodes: " + receivedNodes);
 
             // Update our list with the received list
             ArrayList<GossipNode> otherNodes = new ArrayList<GossipNode>();

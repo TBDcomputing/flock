@@ -49,7 +49,7 @@ public class GossipSender {
             HashMap<String, GossipNode> nodeMap = manager.getNodeMap();
 
             // Serialize and send our entire list of nodes
-            JSONArray json = new JSONArray(nodes);
+            JSONArray json = new JSONArray(nodes.parallelStream().map(GossipNode::toJSON).toArray());
             buf = json.toString().getBytes();
             packet = new DatagramPacket(buf, buf.length, other.getAddr(), Constants.GOSSIP_RECEIVE_PORT);
 
