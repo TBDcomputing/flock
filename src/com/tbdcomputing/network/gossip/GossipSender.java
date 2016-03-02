@@ -30,7 +30,9 @@ public class GossipSender {
 
         me.setHeartbeat(me.getHeartbeat() + 1);
         GossipNode other = manager.gossipListener.onPickPartner(manager.getNodes());
-        sendNodeList(other);
+        if (other != null) {
+            sendNodeList(other);
+        }
     }
 
     /**

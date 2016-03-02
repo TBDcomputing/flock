@@ -24,8 +24,13 @@ public class GossipManager {
         nodes = Collections.synchronizedList(new ArrayList<GossipNode>());
         nodeMap = new HashMap<String, GossipNode>();
         me = new GossipNode();
-        nodes.add(me);
-        nodeMap.put(me.getUUID(), me);
+        try {
+            me.setAddr(InetAddress.getLocalHost());
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+//        nodes.add(me);
+//        nodeMap.put(me.getUUID(), me);
 
         this.gossipListener = gossipListener;
     }

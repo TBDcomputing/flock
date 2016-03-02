@@ -27,8 +27,11 @@ public class Flock {
     private static GossipListener randomListener = new GossipListener() {
         @Override
         public GossipNode onPickPartner(List<GossipNode> nodes) {
-            int index = (int) Math.floor((Math.random() * nodes.size()));
-            return nodes.get(index);
+            if (!nodes.isEmpty()) {
+                int index = (int) Math.floor((Math.random() * nodes.size()));
+                return nodes.get(index);
+            }
+            return null;
         }
     };
     // stores information about the nodes including itself

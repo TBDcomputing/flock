@@ -5,6 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 
 /**
@@ -39,12 +40,18 @@ public class GossipNode {
 
     public GossipNode(JSONObject json) throws JSONException {
         this.setUUID(json.getString("id"));
+        try {
+            this.setAddr(InetAddress.getByName(json.getString("address")));
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
         // TODO populate other fields as we populate the JSON
     }
 
     public JSONObject toJSON() {
         JSONObject obj = new JSONObject();
         obj.put("id", uuid);
+        obj.put("address", addr.getHostAddress());
         // TODO: add more data about this node to the JSONObject
         return obj;
     }
