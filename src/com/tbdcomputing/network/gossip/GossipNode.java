@@ -28,6 +28,9 @@ public class GossipNode {
     public GossipNode() {
         this.setUUID(Constants.getUUID());
         // TODO populate other fields
+        this.heartbeat = 0;
+        this.generationTime = System.currentTimeMillis();
+        this.status = GossipStatus.NORMAL; // TODO: change to starting and update lifecycle of GossipNode to update status.
     }
 
 //	public GossipNode(InetAddress addr) {
@@ -48,6 +51,7 @@ public class GossipNode {
         this.setHeartbeat(json.getInt("heartbeat"));
         this.setGenerationTime(json.getLong("generation_time"));
         // TODO populate other fields as we populate the JSON
+        this.setStatus(GossipStatus.valueOf(json.getString("status")));
     }
 
     public JSONObject toJSON() {
@@ -56,6 +60,7 @@ public class GossipNode {
         obj.put("address", addr.getHostAddress());
         obj.put("heartbeat", heartbeat);
         obj.put("generation_time", generationTime);
+        obj.put("status", status.toString());
         // TODO: add more data about this node to the JSONObject
         return obj;
     }
