@@ -45,6 +45,8 @@ public class GossipNode {
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
+        this.setHeartbeat(json.getInt("heartbeat"));
+        this.setGenerationTime(json.getLong("generation_time"));
         // TODO populate other fields as we populate the JSON
     }
 
@@ -52,6 +54,8 @@ public class GossipNode {
         JSONObject obj = new JSONObject();
         obj.put("id", uuid);
         obj.put("address", addr.getHostAddress());
+        obj.put("heartbeat", heartbeat);
+        obj.put("generation_time", generationTime);
         // TODO: add more data about this node to the JSONObject
         return obj;
     }
