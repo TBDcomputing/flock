@@ -15,18 +15,12 @@ import java.util.List;
 /**
  * Created by drew on 3/1/16.
  */
-public class GossipReceiver implements Runnable {
+public class GossipReceiver {
 
     private GossipManager manager;
 
     public GossipReceiver(GossipManager manager) {
         this.manager = manager;
-    }
-
-    public void run() {
-        while(true) {
-            receiveNodeList();
-        }
     }
 
     /**

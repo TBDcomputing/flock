@@ -18,14 +18,16 @@ public class GossipManager {
     private List<GossipNode> nodes;
     private HashMap<String, GossipNode> nodeMap;
     private GossipNode me;
+    public GossipListener gossipListener;
 
-    public GossipManager() {
+    public GossipManager(GossipListener gossipListener) {
         nodes = Collections.synchronizedList(new ArrayList<GossipNode>());
         nodeMap = new HashMap<String, GossipNode>();
         me = new GossipNode();
         nodes.add(me);
         nodeMap.put(me.getUUID(), me);
 
+        this.gossipListener = gossipListener;
     }
 
     public GossipNode getMe() {

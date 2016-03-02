@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Created by drew on 3/1/16.
  */
-public class GossipSender implements Runnable {
+public class GossipSender {
 
     private GossipManager manager;
 
@@ -23,20 +23,12 @@ public class GossipSender implements Runnable {
         this.manager = manager;
     }
 
-    public void run() {
+    public void gossip() {
         GossipNode me = manager.getMe();
 
-        while(true) {
-            me.setHeartbeat(me.getHeartbeat() + 1);
-            GossipNode other = pickPartner();
-            sendNodeList(other);
-
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        me.setHeartbeat(me.getHeartbeat() + 1);
+        GossipNode other = manager.gossipListener.onPickPartner(manager.getNodes());
+        sendNodeList(other);
     }
 
     /**
@@ -91,10 +83,10 @@ public class GossipSender implements Runnable {
      *
      * @return A GossipNode from the nodes list.
      */
-    public GossipNode pickPartner() {
-        List<GossipNode> nodes = manager.getNodes();
-
-        int index = (int) Math.floor((Math.random() * nodes.size()));
-        return nodes.get(index);
-    }
+//    public GossipNode pickPartner() {
+//        List<GossipNode> nodes = manager.getNodes();
+//
+//        int index = (int) Math.floor((Math.random() * nodes.size()));
+//        return nodes.get(index);
+//    }
 }

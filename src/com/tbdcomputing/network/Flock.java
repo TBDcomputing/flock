@@ -3,12 +3,12 @@ package com.tbdcomputing.network;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryBroadcaster;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryListener;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryReceiver;
-import com.tbdcomputing.network.gossip.GossipManager;
-import com.tbdcomputing.network.gossip.GossipNode;
+import com.tbdcomputing.network.gossip.*;
 import org.json.JSONObject;
 
 import java.net.DatagramPacket;
 import java.net.SocketException;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -22,8 +22,19 @@ public class Flock {
 
     private static boolean running = false;
 
+    private static CancellableThread gossipReceiverThread;
+    private static CancellableThread gossipSenderThread;
+    private static GossipListener randomListener = new GossipListener() {
+        @Override
+        public GossipNode onPickPartner(List<GossipNode> nodes) {
+            int index = (int) Math.floor((Math.random() * nodes.size()));
+            return nodes.get(index);
+        }
+    };
     // stores information about the nodes including itself
-    private static GossipManager manager = new GossipManager();
+    private static GossipManager manager = new GossipManager(randomListener);
+    private static GossipReceiver gossipReceiver = new GossipReceiver(manager);
+    private static GossipSender gossipSender = new GossipSender(manager);
 
     private static CancellableThread receiverThread;
     private static NetworkDiscoveryListener basicListener = new NetworkDiscoveryListener() {
@@ -104,6 +115,31 @@ public class Flock {
             }
         };
         broadcasterThread.start();
+
+        gossipReceiverThread = new CancellableThread() {
+            @Override
+            public void run() {
+                while (!isCancelled) {
+                    gossipReceiver.receiveNodeList();
+                }
+            }
+        };
+        gossipReceiverThread.start();
+
+        gossipSenderThread = new CancellableThread() {
+            @Override
+            public void run() {
+                while (!isCancelled) {
+                    gossipSender.gossip();
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        gossipSenderThread.start();
     }
 
     /**
