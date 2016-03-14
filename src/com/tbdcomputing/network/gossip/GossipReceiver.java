@@ -11,6 +11,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by drew on 3/1/16.
@@ -33,7 +34,7 @@ public class GossipReceiver {
             socket.setReuseAddress(true);
 
             List<GossipNode> nodes = manager.getNodes();
-            HashMap<String, GossipNode> nodeMap = manager.getNodeMap();
+            Map<String, GossipNode> nodeMap = manager.getNodeMap();
 
             // Receive the list of nodes.
             byte[] buf = new byte[10240];
