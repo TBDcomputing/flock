@@ -35,7 +35,7 @@ public class GossipManager {
         this.gossipListener = gossipListener;
     }
 
-    public GossipNode getMe() {
+    public synchronized GossipNode getMe() {
         return me;
     }
 
@@ -45,7 +45,7 @@ public class GossipManager {
      * @param uuid The UUID to search for.
      * @return A GossipNode that contains the given UUID, null if not found.
      */
-    public GossipNode getGossipNodeByUUID(String uuid) {
+    public synchronized GossipNode getGossipNodeByUUID(String uuid) {
         return nodeMap.get(uuid);
     }
 
@@ -54,7 +54,7 @@ public class GossipManager {
      *
      * @param node The node to add.
      */
-    public void addNode(GossipNode node) {
+    public synchronized void addNode(GossipNode node) {
         if (!nodeMap.containsKey(node.getUUID())) {
             nodes.add(node);
             nodeMap.put(node.getUUID(), node);
@@ -66,16 +66,16 @@ public class GossipManager {
      *
      * @param uuid The UUID corresponding to the removed node.
      */
-    public void removeNodeByUUID(String uuid) {
+    public synchronized void removeNodeByUUID(String uuid) {
         GossipNode node = nodeMap.remove(uuid);
         nodes.remove(node);
     }
 
-    public List<GossipNode> getNodes() {
+    public synchronized List<GossipNode> getNodes() {
         return nodes;
     }
 
-    public HashMap<String, GossipNode> getNodeMap() {
+    public synchronized HashMap<String, GossipNode> getNodeMap() {
         return nodeMap;
     }
 

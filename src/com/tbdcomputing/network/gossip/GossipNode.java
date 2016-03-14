@@ -77,6 +77,18 @@ public class GossipNode {
         return "UUID: " + getUUID();
     }
 
+    @Override
+    public int hashCode() {
+        return this.getUUID().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) return false;
+        GossipNode oth = (GossipNode) o;
+        return this.getUUID().equals(oth.getUUID());
+    }
+
     public synchronized String getUUID() {
         return uuid;
     }
