@@ -12,6 +12,8 @@ public class Constants {
     public static final String BROADCAST_ADDRESS = "255.255.255.255";
     public static final int GOSSIP_PORT = 8889;
     public static final int GOSSIP_RECEIVE_PORT = 8890;
+    public static final int ELECTION_PORT = 8891;
+    public static final int ELECTION_RECEIVE_PORT = 8892;
 
     public static String getUUID() {
         try {
