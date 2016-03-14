@@ -2,10 +2,7 @@ package com.tbdcomputing.network.gossip;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 
 import com.tbdcomputing.network.Constants;
 import com.tbdcomputing.network.utils.GossipListUtils;
@@ -16,13 +13,13 @@ import org.json.JSONArray;
  */
 public class GossipManager {
     private List<GossipNode> nodes;
-    private HashMap<String, GossipNode> nodeMap;
+    private Map<String, GossipNode> nodeMap;
     private GossipNode me;
     public GossipListener gossipListener;
 
     public GossipManager(GossipListener gossipListener) {
         nodes = Collections.synchronizedList(new ArrayList<GossipNode>());
-        nodeMap = new HashMap<String, GossipNode>();
+        nodeMap = Collections.synchronizedMap(new HashMap<String, GossipNode>());
         me = new GossipNode();
         try {
             me.setAddr(InetAddress.getLocalHost());
