@@ -32,7 +32,6 @@ public class GossipReceiver {
         try {
             // Create a socket and allow reuse.
             socket = new DatagramSocket(Constants.GOSSIP_RECEIVE_PORT);
-            socket.setSoTimeout(5000);
 
             socket.setReuseAddress(true);
 
@@ -66,6 +65,7 @@ public class GossipReceiver {
             JSONArray json = new JSONArray(diffNodes.parallelStream().map(GossipNode::toJSON).toArray());
             buf = json.toString().getBytes();
 
+            socket.setSoTimeout(5000);
             socket.send(new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort()));
         } catch (SocketException e) {
 //            e.printStackTrace();
