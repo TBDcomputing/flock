@@ -43,6 +43,8 @@ public class GossipSender {
 
         try {
             DatagramSocket socket = new DatagramSocket();
+            socket.setSoTimeout(500);
+            
             DatagramPacket packet;
             byte[] buf;
 

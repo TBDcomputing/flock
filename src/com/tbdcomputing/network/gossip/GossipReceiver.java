@@ -31,6 +31,8 @@ public class GossipReceiver {
         try {
             // Create a socket and allow reuse.
             DatagramSocket socket = new DatagramSocket(Constants.GOSSIP_RECEIVE_PORT);
+            socket.setSoTimeout(500);
+
             socket.setReuseAddress(true);
 
             List<GossipNode> nodes = manager.getNodes();
