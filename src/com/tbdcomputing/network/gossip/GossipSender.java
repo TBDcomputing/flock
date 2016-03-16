@@ -41,9 +41,10 @@ public class GossipSender {
      */
     public void sendNodeList(GossipNode other) {
 
+        DatagramSocket socket = null;
         try {
-            DatagramSocket socket = new DatagramSocket();
-            socket.setSoTimeout(500);
+            socket = new DatagramSocket();
+            socket.setSoTimeout(5000);
             
             DatagramPacket packet;
             byte[] buf;
@@ -77,12 +78,14 @@ public class GossipSender {
 
             // Merge node lists.
             GossipListUtils.mergeList(nodes, otherNodes, manager.getNodeMap());
-
-            socket.close();
         } catch (SocketException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (socket != null) {
+                socket.close();
+            }
         }
 
     }

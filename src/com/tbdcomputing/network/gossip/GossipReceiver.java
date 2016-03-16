@@ -28,10 +28,11 @@ public class GossipReceiver {
      * Receive a list of nodes, update our nodes accordingly and send back a list of nodes to update the sender with.
      */
     public void receiveNodeList() {
+        DatagramSocket socket = null;
         try {
             // Create a socket and allow reuse.
-            DatagramSocket socket = new DatagramSocket(Constants.GOSSIP_RECEIVE_PORT);
-            socket.setSoTimeout(500);
+            socket = new DatagramSocket(Constants.GOSSIP_RECEIVE_PORT);
+            socket.setSoTimeout(5000);
 
             socket.setReuseAddress(true);
 
@@ -66,12 +67,14 @@ public class GossipReceiver {
             buf = json.toString().getBytes();
 
             socket.send(new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort()));
-
-            socket.close();
         } catch (SocketException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (socket != null) {
+                socket.close();
+            }
         }
     }
 }
