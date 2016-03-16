@@ -47,10 +47,12 @@ public class GossipSender {
             byte[] buf;
 
             List<GossipNode> nodes = manager.getNodes();
-            Map<String, GossipNode> nodeMap = manager.getNodeMap();
+
+            ArrayList<GossipNode> copyNodes = new ArrayList<>(nodes);
+            copyNodes.add(manager.getMe());
 
             // Serialize and send our entire list of nodes
-            JSONArray json = new JSONArray(nodes.parallelStream().map(GossipNode::toJSON).toArray());
+            JSONArray json = new JSONArray(copyNodes.parallelStream().map(GossipNode::toJSON).toArray());
             buf = json.toString().getBytes();
             packet = new DatagramPacket(buf, buf.length, other.getAddr(), Constants.GOSSIP_RECEIVE_PORT);
 
@@ -72,7 +74,7 @@ public class GossipSender {
             }
 
             // Merge node lists.
-            GossipListUtils.mergeList(nodes, otherNodes, nodeMap);
+            GossipListUtils.mergeList(nodes, otherNodes, manager.getNodeMap());
 
             socket.close();
         } catch (SocketException e) {
