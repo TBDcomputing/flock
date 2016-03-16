@@ -23,7 +23,7 @@ public class GossipListUtils {
             }
 
             // Find corresponding node in our list
-            GossipNode ourNode = findNodeByUUID(node.getUUID(), map);
+            GossipNode ourNode = map.get(node.getUUID());
 
             if(ourNode != null) {
                 // If it is in our list, choose the more up to date one
@@ -42,6 +42,7 @@ public class GossipListUtils {
             } else {
                 // It is not in our list, so add it to our list.
                 ourList.add(node);
+                map.put(node.getUUID(), node);
             }
 
         }
@@ -57,7 +58,7 @@ public class GossipListUtils {
         List<GossipNode> nodes = new ArrayList<GossipNode>();
 
         for(GossipNode node : otherList) {
-            GossipNode ourNode = findNodeByUUID(node.getUUID(), map);
+            GossipNode ourNode = map.get(node.getUUID());
 
             if(ourNode != null) {
                 if(ourNode.getGenerationTime() < node.getGenerationTime()) {
@@ -89,15 +90,5 @@ public class GossipListUtils {
         return nodes;
     }
 
-
-    /**
-     * Finds the node with the following UUID in our list of nodes.
-     * @param uuid  The UUID to search for.
-     * @param nodeHashMap   The map to search in.
-     * @return  The node that possesses that uuid or null if it is not in the list.
-     */
-    public static GossipNode findNodeByUUID(String uuid, Map<String, GossipNode> nodeHashMap) {
-        return nodeHashMap.get(uuid);
-    }
 
 }
