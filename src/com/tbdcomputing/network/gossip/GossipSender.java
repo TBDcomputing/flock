@@ -11,6 +11,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by drew on 3/1/16.
@@ -46,7 +47,7 @@ public class GossipSender {
             byte[] buf;
 
             List<GossipNode> nodes = manager.getNodes();
-            HashMap<String, GossipNode> nodeMap = manager.getNodeMap();
+            Map<String, GossipNode> nodeMap = manager.getNodeMap();
 
             // Serialize and send our entire list of nodes
             JSONArray json = new JSONArray(nodes.parallelStream().map(GossipNode::toJSON).toArray());

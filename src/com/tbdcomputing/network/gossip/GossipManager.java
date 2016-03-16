@@ -72,7 +72,7 @@ public class GossipManager {
         return nodes;
     }
 
-    public synchronized HashMap<String, GossipNode> getNodeMap() {
+    public synchronized Map<String, GossipNode> getNodeMap() {
         return nodeMap;
     }
 

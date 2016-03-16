@@ -6,6 +6,7 @@ import com.tbdcomputing.network.gossip.GossipNode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by drew on 2/26/16.
@@ -15,7 +16,7 @@ public class GossipListUtils {
      * Merge the other list of @GossipNode in to our list of gossip nodes comparing based on generation time and heartbeat data.
      * @param otherList
      */
-    public static void mergeList(List<GossipNode> ourList, List<GossipNode> otherList, HashMap<String, GossipNode> map) {
+    public static void mergeList(List<GossipNode> ourList, List<GossipNode> otherList, Map<String, GossipNode> map) {
         for(GossipNode node: otherList) {
             if (node.getUUID().equals(Constants.getUUID())) {
                 continue;
@@ -52,7 +53,7 @@ public class GossipListUtils {
      * @param otherList The list of nodes to compare to.
      * @return          A list of all nodes that differ between the two lists.
      */
-    public static List<GossipNode> generateDiffList(List<GossipNode> ourList, List<GossipNode> otherList, HashMap<String, GossipNode> map) {
+    public static List<GossipNode> generateDiffList(List<GossipNode> ourList, List<GossipNode> otherList, Map<String, GossipNode> map) {
         List<GossipNode> nodes = new ArrayList<GossipNode>();
 
         for(GossipNode node : otherList) {
@@ -95,7 +96,7 @@ public class GossipListUtils {
      * @param nodeHashMap   The map to search in.
      * @return  The node that possesses that uuid or null if it is not in the list.
      */
-    public static GossipNode findNodeByUUID(String uuid, HashMap<String, GossipNode> nodeHashMap) {
+    public static GossipNode findNodeByUUID(String uuid, Map<String, GossipNode> nodeHashMap) {
         return nodeHashMap.get(uuid);
     }
 
