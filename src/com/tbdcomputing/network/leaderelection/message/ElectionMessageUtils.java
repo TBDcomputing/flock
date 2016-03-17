@@ -7,11 +7,28 @@ import org.json.JSONObject;
  */
 public class ElectionMessageUtils {
     public JSONObject makeMessage(long term, ElectionMessageType messageType) {
-        if (messageType == ElectionMessageType.REQUESTVOTE) {
 
-        } else if (messageType == ElectionMessageType.SUPPRESSION) {
+        JSONObject obj = new JSONObject();
+        obj.put("term", term);
+        obj.put("id", "uuid?");
 
+        switch (messageType) {
+            case REQUESTVOTE:
+                obj.put("type", "requestvote");
+                break;
+            case HEARTBEAT:
+                obj.put("type", "heartbeat");
+                break;
+            case VOTEGRANTED:
+                obj.put("type", "vote");
+                break;
+            case RESPONSE:
+                obj.put("type", "response");
+                break;
+            default:
+                obj = null;
         }
-        return null;
+
+        return obj;
     }
 }

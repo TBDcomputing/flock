@@ -30,11 +30,68 @@ public class ElectionLeader extends ElectionState {
         }, 0, ElectionSettings.HEARTBEAT_INTERVAL);
     }
 
-    void sendHeartbeat() {
-        // broadcast suppression Message to all
+    /**
+     * TODO
+     *
+     * @return
+     */
+    @Override
+    public ElectionState handleRequestVote() {
+        return this;
     }
 
-    public void destroy() {
+    /**
+     * TODO
+     *
+     * @return
+     */
+    @Override
+    public ElectionState handleHeartbeat() {
+        return this;
+    }
+
+    /**
+     * TODO
+     *
+     * @return
+     */
+    @Override
+    public ElectionState handleVoteGranted() {
+        return this;
+    }
+
+    /**
+     * TODO
+     *
+     * @return
+     */
+    @Override
+    public ElectionState handleResponse() {
+        return this;
+    }
+
+    /**
+     * Broadcasts a suppression message to all nodes in the cluster through heartbeats
+     * TODO
+     */
+    private void sendHeartbeat() {
+    }
+
+    /**
+     * Leaders don't have a socket timeout
+     *
+     * @return 0 which disables socket timeout
+     */
+    @Override
+    public int getTimeout() {
+        return 0;
+    }
+
+    /**
+     * Cleans up leader before transitioning
+     * TODO
+     */
+    private void close() {
         timer.cancel();
     }
 }

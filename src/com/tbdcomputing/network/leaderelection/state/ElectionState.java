@@ -22,34 +22,49 @@ import java.net.SocketTimeoutException;
  * - Send out a heartbeat every ~150ms in order to suppress Followers
  */
 public abstract class ElectionState {
-    private ElectionStateContext context;
-    private DatagramSocket socket;
+    protected ElectionStateContext context;
 
     public ElectionState(ElectionStateContext e) {
         context = e;
-        try {
-            this.socket = new DatagramSocket(Constants.ELECTION_RECEIVE_PORT);
-            this.socket.setReuseAddress(true);
-            this.socket.setSoTimeout(ElectionSettings.ELECTION_TIMEOUT_SEED);
-        } catch (SocketException se) {
-            se.printStackTrace();
+    }
+
+    public long getTerm() {
+        return context.getTerm();
+    }
+
+    /**
+     * Methods to handle messages from other nodes.
+     */
+    public abstract ElectionState handleRequestVote();
+
+    public abstract ElectionState handleHeartbeat();
+
+    public abstract ElectionState handleVoteGranted();
+
+    public abstract ElectionState handleResponse();
+
+    /**
+     * @return timeout in milliseconds (0 implies no timeout)
+     */
+    public abstract int getTimeout();
+
+    /**
+     * Transitions into another state.
+     *
+     * @param type the state to transition to
+     * @return new state
+     */
+    public ElectionState transition(ElectionStateType type) {
+        switch (type) {
+            case LEADER:
+                return new ElectionLeader(this.context);
+            case CANDIDATE:
+                return new ElectionCandidate(this.context);
+            case FOLLOWER:
+                return new ElectionFollower(this.context);
+            default:
+                return null;
         }
     }
 
-    public void listen() {
-        try {
-            //TODO: set max size for buf in Constants, and use it here
-            byte[] buf = new byte[1000];
-            DatagramPacket packet = new DatagramPacket(buf, buf.length);
-            socket.receive(packet);
-        } catch (SocketTimeoutException ste) {
-            // change to candidate, start vote!
-        } catch (SocketException e) {
-            e.printStackTrace();
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
-        }
-    }
-
-    public abstract void destroy();
 }

@@ -1,5 +1,7 @@
 package com.tbdcomputing.network.leaderelection.state;
 
+import com.tbdcomputing.network.leaderelection.ElectionSettings;
+
 /**
  * Created by dpho on 3/11/16.
  *
@@ -15,7 +17,7 @@ package com.tbdcomputing.network.leaderelection.state;
  *          -> Promote to leader if so
  */
 public class ElectionCandidate extends ElectionState {
-    private int votes = 0;
+    private int votes = 1; // initialized to 1 as we always vote for ourselves.
 
     public ElectionCandidate(ElectionStateContext e) {
         super(e);
@@ -23,16 +25,71 @@ public class ElectionCandidate extends ElectionState {
         startElection();
     }
 
+    /**
+     * TODO
+     *
+     * @return
+     */
+    @Override
+    public ElectionState handleRequestVote() {
+        return this;
+    }
+
+    /**
+     * TODO
+     *
+     * @return
+     */
+    @Override
+    public ElectionState handleHeartbeat() {
+        return transition(ElectionStateType.FOLLOWER);
+    }
+
+    /**
+     * TODO
+     *
+     * @return
+     */
+    @Override
+    public ElectionState handleVoteGranted() {
+        return incrementVote() ? transition(ElectionStateType.LEADER) : this;
+    }
+
+    /**
+     * TODO
+     *
+     * @return
+     */
+    @Override
+    public ElectionState handleResponse() {
+        return this;
+    }
+
+    /**
+     * Start an election by sending a RequestVote to all nodes in the cluster.
+     */
     private void startElection() {
-        // send requestVote message
+
     }
 
-    public synchronized void incrementVote() {
+    /**
+     * Increment the vote and check the threshold
+     * TODO
+     *
+     * @return has threshold been reached?
+     */
+    private synchronized boolean incrementVote() {
         votes++;
-        /* Check if votes >= n/2 where n := size(cluster) */
+        return true;
     }
 
-    public void destroy() {
-
+    /**
+     * Randomized time for the socket to wait during an election
+     *
+     * @return socket timeout in milliseconds
+     */
+    @Override
+    public int getTimeout() {
+        return ElectionSettings.MINIMUM_TIMEOUT + (int) (Math.random() * ElectionSettings.ELECTION_TIMEOUT_SEED);
     }
 }

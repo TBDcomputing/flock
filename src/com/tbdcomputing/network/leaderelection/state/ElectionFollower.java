@@ -1,5 +1,7 @@
 package com.tbdcomputing.network.leaderelection.state;
 
+import com.tbdcomputing.network.leaderelection.ElectionSettings;
+
 /**
  * Created by dpho on 3/11/16.
  *
@@ -21,7 +23,53 @@ public class ElectionFollower extends ElectionState {
         super(e);
     }
 
-    public void destroy() {
+    /**
+     * TODO
+     *
+     * @return
+     */
+    @Override
+    public ElectionState handleRequestVote() {
+        return this;
+    }
 
+    /**
+     * TODO
+     *
+     * @return
+     */
+    @Override
+    public ElectionState handleHeartbeat() {
+        return this;
+    }
+
+    /**
+     * TODO
+     *
+     * @return
+     */
+    @Override
+    public ElectionState handleVoteGranted() {
+        return this;
+    }
+
+    /**
+     * TODO
+     *
+     * @return
+     */
+    @Override
+    public ElectionState handleResponse() {
+        return this;
+    }
+
+    /**
+     * Randomized time for the socket to wait for a heartbeat from the leader
+     *
+     * @return socket timeout in milliseconds
+     */
+    @Override
+    public int getTimeout() {
+        return ElectionSettings.MINIMUM_TIMEOUT + (int) (Math.random() * ElectionSettings.HEARTBEAT_TIMEOUT_SEED);
     }
 }
