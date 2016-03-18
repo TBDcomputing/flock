@@ -48,7 +48,7 @@ public class GossipNode {
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-        this.setHeartbeat(json.getInt("heartbeat"));
+        this.setHeartbeat(json.getLong("heartbeat"));
         this.setGenerationTime(json.getLong("generation_time"));
         // TODO populate other fields as we populate the JSON
         this.setStatus(GossipStatus.valueOf(json.getString("status")));
