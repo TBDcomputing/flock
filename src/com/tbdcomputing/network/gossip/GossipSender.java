@@ -1,5 +1,6 @@
 package com.tbdcomputing.network.gossip;
 
+import com.sun.javafx.scene.control.skin.VirtualFlow;
 import com.tbdcomputing.network.Constants;
 import com.tbdcomputing.network.utils.GossipListUtils;
 import org.json.JSONArray;
@@ -30,9 +31,13 @@ public class GossipSender {
         long currTime = System.currentTimeMillis();
         me.setHeartbeat(currTime);
 
+        List<GossipNode> deadNodes = new ArrayList<GossipNode>();
         // Set all nodes to dead that have not been heard from recently.
         manager.getNodes().stream().filter(node -> currTime - node.getHeartbeat() > Constants.GOSSIP_DEATH_TIMER)
-                .forEach(node -> manager.removeNodeByUUID(node.getUUID()));
+                .forEach(node -> deadNodes.add(node));
+
+        manager.getNodes().removeAll(deadNodes);
+
 
         GossipNode other = manager.gossipListener.onPickPartner(manager.getNodes());
         if (other != null) {
