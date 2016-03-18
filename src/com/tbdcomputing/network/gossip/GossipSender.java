@@ -9,9 +9,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by drew on 3/1/16.
@@ -29,7 +27,13 @@ public class GossipSender {
 
         GossipNode me = manager.getMe();
 
-        me.setHeartbeat(me.getHeartbeat() + 1);
+        long currTime = System.currentTimeMillis();
+        me.setHeartbeat(currTime);
+
+        // Set all nodes to dead that have not been heard from recently.
+        manager.getNodes().stream().filter(node -> currTime - node.getHeartbeat() > Constants.GOSSIP_DEATH_TIMER)
+                .forEach(node -> manager.removeNodeByUUID(node.getUUID()));
+
         GossipNode other = manager.gossipListener.onPickPartner(manager.getNodes());
         if (other != null) {
             sendNodeList(other);

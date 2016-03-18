@@ -17,7 +17,7 @@ import java.net.UnknownHostException;
 public class GossipNode {
     private String uuid;
     private InetAddress addr;
-    private int heartbeat;
+    private long heartbeat;
     private long generationTime;
     private GossipStatus status;
 
@@ -105,11 +105,11 @@ public class GossipNode {
         this.addr = addr;
     }
 
-    public synchronized int getHeartbeat() {
+    public synchronized long getHeartbeat() {
         return heartbeat;
     }
 
-    public synchronized void setHeartbeat(int heartbeat) {
+    public synchronized void setHeartbeat(long heartbeat) {
         this.heartbeat = heartbeat;
     }
 
