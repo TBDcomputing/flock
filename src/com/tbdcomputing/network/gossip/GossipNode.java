@@ -28,8 +28,8 @@ public class GossipNode {
     public GossipNode() {
         this.setUUID(Constants.getUUID());
         // TODO populate other fields
-        this.heartbeat = 0;
-        this.generationTime = System.currentTimeMillis();
+        this.heartbeat = System.currentTimeMillis();
+        this.generationTime = this.heartbeat;
         this.status = GossipStatus.NORMAL; // TODO: change to starting and update lifecycle of GossipNode to update status.
     }
 
