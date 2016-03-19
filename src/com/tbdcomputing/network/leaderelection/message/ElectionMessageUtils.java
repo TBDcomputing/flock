@@ -2,15 +2,18 @@ package com.tbdcomputing.network.leaderelection.message;
 
 import org.json.JSONObject;
 
+import java.net.InetAddress;
+
 /**
  * Created by dpho on 3/12/16.
  */
 public class ElectionMessageUtils {
-    public JSONObject makeMessage(long term, ElectionMessageType messageType) {
 
+    public static JSONObject makeMessage(long term, InetAddress from, ElectionMessageType messageType) {
         JSONObject obj = new JSONObject();
+
         obj.put("term", term);
-        obj.put("id", "uuid?");
+        obj.put("sender", from.toString());
 
         switch (messageType) {
             case REQUESTVOTE:
