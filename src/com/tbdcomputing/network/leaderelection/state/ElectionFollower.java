@@ -1,6 +1,7 @@
 package com.tbdcomputing.network.leaderelection.state;
 
 import com.tbdcomputing.network.leaderelection.ElectionSettings;
+import org.json.JSONObject;
 
 /**
  * Created by dpho on 3/11/16.
@@ -24,43 +25,27 @@ public class ElectionFollower extends ElectionState {
     }
 
     /**
-     * TODO
+     * Actions taken when a Leader receives a Heartbeat message from another node.
+     * <p>
+     * Update term if possible. No action needed.
      *
-     * @return
+     * @return resulting state after receiving this message
      */
     @Override
-    public ElectionState handleRequestVote() {
-        return this;
+    public ElectionState handleHeartbeat(JSONObject message) {
+        return handleResponse(message);
     }
 
     /**
-     * TODO
+     * A Follower receives a Heartbeat message from another node.
+     * <p>
+     * Update term if ours is outdated. Take no action.
      *
-     * @return
+     * @return resulting state after receiving this message
      */
     @Override
-    public ElectionState handleHeartbeat() {
-        return this;
-    }
-
-    /**
-     * TODO
-     *
-     * @return
-     */
-    @Override
-    public ElectionState handleVoteGranted() {
-        return this;
-    }
-
-    /**
-     * TODO
-     *
-     * @return
-     */
-    @Override
-    public ElectionState handleResponse() {
-        return this;
+    public ElectionState handleVoteGranted(JSONObject message) {
+        return handleResponse(message);
     }
 
     /**
@@ -71,5 +56,10 @@ public class ElectionFollower extends ElectionState {
     @Override
     public int getTimeout() {
         return ElectionSettings.MINIMUM_TIMEOUT + (int) (Math.random() * ElectionSettings.HEARTBEAT_TIMEOUT_SEED);
+    }
+
+    @Override
+    protected void close() {
+        context.setVoted(false);
     }
 }

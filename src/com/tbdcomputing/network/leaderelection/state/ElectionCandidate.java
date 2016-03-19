@@ -1,6 +1,9 @@
 package com.tbdcomputing.network.leaderelection.state;
 
 import com.tbdcomputing.network.leaderelection.ElectionSettings;
+import com.tbdcomputing.network.leaderelection.message.ElectionMessageType;
+import com.tbdcomputing.network.leaderelection.message.ElectionMessageUtils;
+import org.json.JSONObject;
 
 /**
  * Created by dpho on 3/11/16.
@@ -21,66 +24,70 @@ public class ElectionCandidate extends ElectionState {
 
     public ElectionCandidate(ElectionStateContext e) {
         super(e);
-        e.incrementTerm();
+        context.incrementTerm();
+        context.setVoted(true);
         startElection();
     }
 
     /**
-     * TODO
+     * Actions taken when a server in LeaderState sends you a heartbeat.
+     * <p>
+     * Ignore if outdated term. Convert to follower if it isn't outdated.
+     * If it's the same term, we have two leaders. Convert to a Candidate and start a new vote.
      *
-     * @return
+     * @return resulting state after receiving this message
      */
     @Override
-    public ElectionState handleRequestVote() {
-        return this;
+    public ElectionState handleHeartbeat(JSONObject message) {
+        ElectionState result = this;
+
+        long term = message.getLong("term");
+        if (term >= context.getTerm()) {
+            context.setTerm(term);
+            result = transition(ElectionStateType.FOLLOWER);
+        }
+
+        return result;
     }
 
     /**
-     * TODO
+     * Actions taken when we receive a VoteGranted message in response to our VoteRequest
+     * <p>
+     * Increment our vote variable and check to see if we've met the majority threshold.
      *
-     * @return
+     * @return resulting state after receiving this message
      */
     @Override
-    public ElectionState handleHeartbeat() {
-        return transition(ElectionStateType.FOLLOWER);
-    }
+    public ElectionState handleVoteGranted(JSONObject message) {
+        ElectionState result = this;
 
-    /**
-     * TODO
-     *
-     * @return
-     */
-    @Override
-    public ElectionState handleVoteGranted() {
-        return incrementVote() ? transition(ElectionStateType.LEADER) : this;
-    }
+        long term = message.getLong("term");
+        if (term > context.getTerm()) {
+            context.setTerm(term);
+            result = transition(ElectionStateType.FOLLOWER);
+        } else if (term == context.getTerm() && incrementVote()) {
+            result = transition(ElectionStateType.LEADER);
+        }
 
-    /**
-     * TODO
-     *
-     * @return
-     */
-    @Override
-    public ElectionState handleResponse() {
-        return this;
+        return result;
     }
 
     /**
      * Start an election by sending a RequestVote to all nodes in the cluster.
      */
     private void startElection() {
-
+        JSONObject msg = ElectionMessageUtils.makeMessage(context.getTerm(),
+                context.getMyAddr(), ElectionMessageType.REQUESTVOTE);
+        context.getSender().broadcast(msg, context.getManager().getNodes());
     }
 
     /**
-     * Increment the vote and check the threshold
-     * TODO
+     * Increment the vote and check to see if threshold has been reached
      *
-     * @return has threshold been reached?
+     * @return should I be promoted?
      */
     private synchronized boolean incrementVote() {
-        votes++;
-        return true;
+        return ++votes >= context.getManager().getNodes().size() / 2;
     }
 
     /**
@@ -91,5 +98,10 @@ public class ElectionCandidate extends ElectionState {
     @Override
     public int getTimeout() {
         return ElectionSettings.MINIMUM_TIMEOUT + (int) (Math.random() * ElectionSettings.ELECTION_TIMEOUT_SEED);
+    }
+
+    @Override
+    protected void close() {
+        context.setVoted(false);
     }
 }

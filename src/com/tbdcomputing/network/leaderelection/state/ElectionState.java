@@ -1,25 +1,14 @@
 package com.tbdcomputing.network.leaderelection.state;
 
-import com.tbdcomputing.network.Constants;
-import com.tbdcomputing.network.leaderelection.ElectionSettings;
+import com.tbdcomputing.network.leaderelection.message.ElectionMessageType;
+import com.tbdcomputing.network.leaderelection.message.ElectionMessageUtils;
+import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
- * Followers:
- * - Respond to messages sent by Candidates and Leaders
- * <p>
- * Candidates:
- * - Start a RequestVote when newly promoted
- * - Tally up votes
- * - When votes >= N/2, become a leader
- * <p>
- * Leaders:
- * - Send out a heartbeat every ~150ms in order to suppress Followers
+ * Standard ElectionState class which Followers, Candidates, and Leaders extend.
  */
 public abstract class ElectionState {
     protected ElectionStateContext context;
@@ -28,25 +17,80 @@ public abstract class ElectionState {
         context = e;
     }
 
-    public long getTerm() {
-        return context.getTerm();
+    public abstract ElectionState handleHeartbeat(JSONObject message);
+
+    public abstract ElectionState handleVoteGranted(JSONObject message);
+
+    /**
+     * Actions taken when a Leader receives a RequestVote message.
+     * <p>
+     * If the term of the server asking for the vote is greater than ours, revert
+     * to FollowerState and vote for him. If not, ignore it.
+     *
+     * @return resulting state after receiving this message
+     */
+    public ElectionState handleRequestVote(JSONObject message) {
+        ElectionState result = this;
+
+        long term = message.getLong("term");
+        JSONObject msg = ElectionMessageUtils.makeMessage(context.getTerm(),
+                context.getMyAddr(), ElectionMessageType.VOTEGRANTED);
+        if (term > context.getTerm()) {
+            context.setTerm(term);
+            result = transition(ElectionStateType.FOLLOWER);
+            sendVote(msg, message.getString("sender"));
+        } else if (term == context.getTerm() && !context.getVoted()) {
+            sendVote(msg, message.getString("sender"));
+        }
+
+        return result;
     }
 
     /**
-     * Methods to handle messages from other nodes.
+     * All States respond to a Response the same way. Check the term and see if ours is outdated.
+     *
+     * @param message JSON message that we received from another node
+     * @return resulting state after receiving this message
      */
-    public abstract ElectionState handleRequestVote();
+    public ElectionState handleResponse(JSONObject message) {
+        ElectionState result = this;
 
-    public abstract ElectionState handleHeartbeat();
+        long term = message.getLong("term");
+        if (term > context.getTerm()) {
+            context.setTerm(term);
+            result = transition(ElectionStateType.FOLLOWER);
+        }
 
-    public abstract ElectionState handleVoteGranted();
+        return result;
+    }
 
-    public abstract ElectionState handleResponse();
+    /**
+     * Send a VoteGranted message.
+     *
+     * @param sender String representation of the InetAddress we want to vote for
+     */
+    protected void sendVote(JSONObject msg, String sender) {
+        try {
+            // Extract addr from the message to send your vote to
+            InetAddress voteDst = InetAddress.getByName(sender);
+
+            context.getSender().sendMessage(msg, voteDst);
+            context.setVoted(true);
+        } catch (UnknownHostException e) {
+            // can't find the node? Don't vote for it.
+            context.setVoted(false);
+        }
+    }
 
     /**
      * @return timeout in milliseconds (0 implies no timeout)
      */
     public abstract int getTimeout();
+
+    /**
+     * Clean up the state prior to transitioning.
+     */
+    protected abstract void close();
 
     /**
      * Transitions into another state.
@@ -55,6 +99,9 @@ public abstract class ElectionState {
      * @return new state
      */
     public ElectionState transition(ElectionStateType type) {
+        // clean up loose ends before transitioning
+        this.close();
+
         switch (type) {
             case LEADER:
                 return new ElectionLeader(this.context);
