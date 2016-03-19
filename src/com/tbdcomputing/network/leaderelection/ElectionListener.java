@@ -1,6 +1,7 @@
 package com.tbdcomputing.network.leaderelection;
 
 import com.tbdcomputing.network.Constants;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -10,16 +11,13 @@ import java.net.SocketTimeoutException;
 
 /**
  * Receives all messages
- *
+ * <p>
  * Created by dpho on 3/14/16.
  */
 public abstract class ElectionListener {
     private DatagramSocket socket;
-    private long lastHeartbeat;
 
     public ElectionListener() {
-        this.lastHeartbeat = System.currentTimeMillis();
-
         try {
             this.socket = new DatagramSocket(Constants.ELECTION_RECEIVE_PORT);
             this.socket.setReuseAddress(true);
@@ -31,14 +29,15 @@ public abstract class ElectionListener {
     /**
      * Listening for any messages from other nodes.
      */
-    public void listen() {
-        lastHeartbeat = System.currentTimeMillis();
+    public JSONObject listen() {
+        JSONObject result = null;
 
         try {
-            //TODO: set max size for buf in Constants, and use it here
-            byte[] buf = new byte[1000];
+            // grabbing the JSONObject message from other server
+            byte[] buf = new byte[10240];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
             socket.receive(packet);
+            result = new JSONObject(new String(packet.getData(), 0, packet.getLength()));
         } catch (SocketTimeoutException ste) {
             // timed out! become a candidate and start a vote!
             onTimeout();
@@ -47,13 +46,8 @@ public abstract class ElectionListener {
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
-    }
 
-    /**
-     * @return the time left until our heartbeat timer expires and we transition into CandidateState
-     */
-    public int timeSinceLastHeartbeat() {
-        return (int) (System.currentTimeMillis() - lastHeartbeat);
+        return result;
     }
 
     /**
