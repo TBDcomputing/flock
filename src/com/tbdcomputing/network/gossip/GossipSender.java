@@ -32,10 +32,17 @@ public class GossipSender {
         me.setHeartbeat(currTime);
 
         List<GossipNode> deadNodes = new ArrayList<GossipNode>();
+
         // Set all nodes to dead that have not been heard from recently.
         manager.getNodes().stream().filter(node -> currTime - node.getHeartbeat() > Constants.GOSSIP_DEATH_TIMER)
                 .forEach(node -> deadNodes.add(node));
 
+        // Set all leaving nodes to dead after some time threshold to be removed on next iteration.
+        manager.getNodes().stream().filter(node -> node.getStatus() == GossipStatus.LEAVING && currTime -
+                node.getHeartbeat() > Constants.GOSSIP_LEAVING_TIMER)
+                .forEach(node -> node.setStatus(GossipStatus.DEAD));
+
+        // Remove the list of dead nodes.
         manager.getNodes().removeAll(deadNodes);
 
 

@@ -68,12 +68,19 @@ public class Flock {
                 run();
             } else if (cmd.toLowerCase().equals("quit") && running) {
                 System.out.println("system shutting down...");
+                manager.getMe().setStatus(GossipStatus.LEAVING);
+                gossipSender.gossip();
+
                 // Stop the cancellable thread wrappers and then join them
                 receiverThread.cancel();
                 broadcasterThread.cancel();
+                gossipSenderThread.cancel();
+                gossipReceiverThread.cancel();
                 try {
                     receiverThread.join();
                     broadcasterThread.join();
+                    gossipSenderThread.join();
+                    gossipReceiverThread.join();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
