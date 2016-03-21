@@ -4,6 +4,7 @@ import com.tbdcomputing.network.discovery.NetworkDiscoveryBroadcaster;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryListener;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryReceiver;
 import com.tbdcomputing.network.gossip.*;
+import com.tbdcomputing.network.leaderelection.ElectionManager;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -59,13 +60,15 @@ public class Flock {
     private static Thread broadcasterThread;
     private static NetworkDiscoveryBroadcaster broadcaster;
 
+    private static ElectionManager election;
+
     public static void main(String[] args) {
 
         //TODO add a startup command probably with apache cli and then also a preferences object
         Scanner cmdLine = new Scanner(System.in);
         while (true) {
             String cmd = cmdLine.nextLine();
-            if (cmd.toLowerCase().equals("start")) {
+            if (cmd.toLowerCase().equals("start") && !running) {
                 running = true;
                 run();
             } else if (cmd.toLowerCase().equals("quit") && running) {
@@ -94,10 +97,19 @@ public class Flock {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                // stopping leader election
+                election.interrupt();
                 System.out.println("System shutdown complete, later tater!");
                 break;
+            } else if (cmd.toLowerCase().equals("elect") && running) {
+                startElection();
             }
         }
+    }
+
+    private static void startElection() {
+        election = new ElectionManager(manager);
+        election.run();
     }
 
     private static void run() {
