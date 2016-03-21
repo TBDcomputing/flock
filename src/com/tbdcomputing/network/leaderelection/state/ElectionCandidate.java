@@ -22,7 +22,7 @@ import java.util.logging.Level;
  *          -> Promote to leader if so
  */
 public class ElectionCandidate extends ElectionState {
-    private int votes = 0; // initialized to 1 as we always vote for ourselves.
+    private int votes = 1; // initialized to 1 as we always vote for ourselves.
 
     public ElectionCandidate(ElectionStateContext e) {
         super(e);
@@ -90,7 +90,8 @@ public class ElectionCandidate extends ElectionState {
      * @return should I be promoted?
      */
     private synchronized boolean incrementVote() {
-        return ++votes+1 >= context.getManager().getNodes().size() / 2;
+        log.log(Level.INFO, "I have this many votes "+ (++votes) + " and I need at least {0}.", context.getManager().getNodes().size() / 2);
+        return votes >= context.getManager().getNodes().size() / 2;
     }
 
     /**
