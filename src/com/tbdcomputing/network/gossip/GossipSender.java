@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -95,7 +96,9 @@ public class GossipSender {
             // Merge node lists.
             GossipListUtils.mergeList(nodes, otherNodes, manager.getNodeMap());
         } catch (SocketException e) {
-//            e.printStackTrace();
+            e.printStackTrace();
+        } catch (SocketTimeoutException e) {
+            System.err.println("Failed to communicate in time, non fatal");
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
