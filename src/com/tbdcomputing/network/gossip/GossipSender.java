@@ -43,7 +43,7 @@ public class GossipSender {
                 .forEach(node -> node.setStatus(GossipStatus.DEAD));
 
         // Remove the list of dead nodes.
-        manager.getNodes().removeAll(deadNodes);
+        manager.removeAll(deadNodes);
 
 
         GossipNode other = manager.gossipListener.onPickPartner(manager.getNodes());

@@ -68,6 +68,11 @@ public class GossipManager {
         nodes.remove(node);
     }
 
+    public synchronized void removeAll(Collection<GossipNode> nodesToRemove) {
+        nodes.removeAll(nodesToRemove);
+        nodesToRemove.stream().forEach(node -> nodeMap.remove(node.getUUID()));
+    }
+
     public synchronized List<GossipNode> getNodes() {
         return nodes;
     }
