@@ -4,6 +4,7 @@ import com.tbdcomputing.network.discovery.NetworkDiscoveryBroadcaster;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryListener;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryReceiver;
 import com.tbdcomputing.network.gossip.*;
+import com.tbdcomputing.network.leaderelection.ElectionManager;
 import org.json.JSONObject;
 
 import java.net.DatagramPacket;
@@ -57,13 +58,15 @@ public class Flock {
     private static CancellableThread broadcasterThread;
     private static NetworkDiscoveryBroadcaster broadcaster = new NetworkDiscoveryBroadcaster(manager.getMe());
 
+    private static ElectionManager election;
+
     public static void main(String[] args) {
 
         //TODO add a startup command probably with apache cli and then also a preferences object
         Scanner cmdLine = new Scanner(System.in);
         while (true) {
             String cmd = cmdLine.nextLine();
-            if (cmd.toLowerCase().equals("start")) {
+            if (cmd.toLowerCase().equals("start") && !running) {
                 running = true;
                 run();
             } else if (cmd.toLowerCase().equals("quit") && running) {
@@ -71,6 +74,7 @@ public class Flock {
                 // Stop the cancellable thread wrappers and then join them
                 receiverThread.cancel();
                 broadcasterThread.cancel();
+                election.interrupt();
                 try {
                     receiverThread.join();
                     broadcasterThread.join();
@@ -79,8 +83,15 @@ public class Flock {
                 }
                 System.out.println("System shutdown complete, later tater!");
                 break;
+            } else if (cmd.toLowerCase().equals("elect") && running) {
+                startElection();
             }
         }
+    }
+
+    private static void startElection() {
+        election = new ElectionManager(manager);
+        election.run();
     }
 
     private static void run() {
