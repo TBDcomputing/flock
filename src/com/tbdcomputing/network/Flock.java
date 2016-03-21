@@ -11,6 +11,7 @@ import java.net.DatagramPacket;
 import java.net.SocketException;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 /**
  * The main class for the Flock software. This class should be run in order to begin the program. It will begin
@@ -26,11 +27,24 @@ public class Flock {
     private static Thread gossipReceiverThread;
     private static Thread gossipSenderThread;
     private static GossipListener randomListener = new GossipListener() {
+
+        private GossipNode lastSelectedNode;
+
         @Override
         public GossipNode onPickPartner(List<GossipNode> nodes) {
-            if (!nodes.isEmpty()) {
-                int index = (int) Math.floor((Math.random() * nodes.size()));
-                return nodes.get(index);
+            // only pick nodes to gossip with normal status
+            List<GossipNode> viableNodes = nodes.stream()
+                    .filter(node -> node.getStatus() == GossipStatus.NORMAL)
+                    .collect(Collectors.toList());
+            if (!viableNodes.isEmpty()) {
+                // attempt to not select the same node as last time
+                int index = (int) Math.floor((Math.random() * viableNodes.size()));
+                if (viableNodes.get(index) == lastSelectedNode) {
+                    index = (index + 1) % viableNodes.size();
+                }
+                lastSelectedNode = viableNodes.get(index);
+                System.out.println("Selected (" + viableNodes.get(index).toString() + ") for gossip");
+                return viableNodes.get(index);
             }
             return null;
         }

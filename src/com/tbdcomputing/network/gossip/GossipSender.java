@@ -39,6 +39,7 @@ public class GossipSender {
                 .forEach(node -> deadNodes.add(node));
 
         // Set all leaving nodes to dead after some time threshold to be removed on next iteration.
+        // TODO: maybe remove instead of setting to dead
         manager.getNodes().stream().filter(node -> node.getStatus() == GossipStatus.LEAVING && currTime -
                 node.getHeartbeat() > Constants.GOSSIP_LEAVING_TIMER)
                 .forEach(node -> node.setStatus(GossipStatus.DEAD));
