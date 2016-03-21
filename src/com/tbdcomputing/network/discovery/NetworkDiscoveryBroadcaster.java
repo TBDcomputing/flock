@@ -92,11 +92,12 @@ public class NetworkDiscoveryBroadcaster implements Runnable {
      */
     @Override
     public void run() {
+        DatagramSocket sock = null;
         try {
             InetAddress addr = InetAddress.getByName(Constants.BROADCAST_ADDRESS);
 
             // don't need to use our port for broadcasting our node's information
-            DatagramSocket sock = new DatagramSocket();
+            sock = new DatagramSocket();
             sock.setBroadcast(true);
             sock.setSoTimeout(1000);
 
@@ -105,13 +106,16 @@ public class NetworkDiscoveryBroadcaster implements Runnable {
             // set the destination to be our predetermined port
             DatagramPacket data = new DatagramPacket(buf, buf.length, addr, Constants.NETWORK_DISCOVERY_PORT);
             sock.send(data);
-            sock.close();
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (SocketException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (sock != null) {
+                sock.close();
+            }
         }
     }
 }

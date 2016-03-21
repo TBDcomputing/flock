@@ -24,11 +24,17 @@ public class GossipReceiver {
         this.manager = manager;
     }
 
+    private DatagramSocket socket;
+
+    public DatagramSocket getSocket() {
+        return socket;
+    }
+
     /**
      * Receive a list of nodes, update our nodes accordingly and send back a list of nodes to update the sender with.
      */
     public void receiveNodeList() {
-        DatagramSocket socket = null;
+        socket = null;
         try {
             // Create a socket and allow reuse.
             socket = new DatagramSocket(Constants.GOSSIP_RECEIVE_PORT);
@@ -75,6 +81,7 @@ public class GossipReceiver {
             if (socket != null) {
                 socket.close();
             }
+            socket = null;
         }
     }
 }

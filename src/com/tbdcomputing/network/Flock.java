@@ -6,6 +6,7 @@ import com.tbdcomputing.network.discovery.NetworkDiscoveryReceiver;
 import com.tbdcomputing.network.gossip.*;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.SocketException;
 import java.util.List;
@@ -22,8 +23,8 @@ public class Flock {
 
     private static boolean running = false;
 
-    private static CancellableThread gossipReceiverThread;
-    private static CancellableThread gossipSenderThread;
+    private static Thread gossipReceiverThread;
+    private static Thread gossipSenderThread;
     private static GossipListener randomListener = new GossipListener() {
         @Override
         public GossipNode onPickPartner(List<GossipNode> nodes) {
@@ -39,7 +40,6 @@ public class Flock {
     private static GossipReceiver gossipReceiver = new GossipReceiver(manager);
     private static GossipSender gossipSender = new GossipSender(manager);
 
-    private static CancellableThread receiverThread;
     private static NetworkDiscoveryListener basicListener = new NetworkDiscoveryListener() {
         @Override
         public void onNodeDiscovered(DatagramPacket packet) {
@@ -53,9 +53,11 @@ public class Flock {
             }
         }
     };
+
+    private static Thread receiverThread;
     private static NetworkDiscoveryReceiver receiver;
-    private static CancellableThread broadcasterThread;
-    private static NetworkDiscoveryBroadcaster broadcaster = new NetworkDiscoveryBroadcaster(manager.getMe());
+    private static Thread broadcasterThread;
+    private static NetworkDiscoveryBroadcaster broadcaster;
 
     public static void main(String[] args) {
 
@@ -72,10 +74,18 @@ public class Flock {
                 gossipSender.gossip();
 
                 // Stop the cancellable thread wrappers and then join them
-                receiverThread.cancel();
-                broadcasterThread.cancel();
-                gossipSenderThread.cancel();
-                gossipReceiverThread.cancel();
+                broadcasterThread.interrupt();
+                receiverThread.interrupt();
+                // we close the socket so that the interrupt will succeed
+                if (receiver.getSocket() != null) {
+                    receiver.getSocket().close();
+                }
+                gossipSenderThread.interrupt();
+                gossipReceiverThread.interrupt();
+                // we close the socket so that the interrupt will succeed
+                if (gossipReceiver.getSocket() != null) {
+                    gossipReceiver.getSocket().close();
+                }
                 try {
                     receiverThread.join();
                     broadcasterThread.join();
@@ -95,75 +105,61 @@ public class Flock {
         // throws a SocketException if we can't bind to the port
         receiver = new NetworkDiscoveryReceiver(basicListener);
         // continually listen for new nodes
-        receiverThread = new CancellableThread() {
+        receiverThread = new Thread() {
             @Override
             public void run() {
-                while (!isCancelled) {
+                while (!isInterrupted()) {
                     receiver.run();
                 }
-                receiver.interrupt();
-                try {
-                    receiver.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                System.err.println("Exiting receiver thread!");
             }
         };
         receiverThread.start();
 
+        broadcaster = new NetworkDiscoveryBroadcaster(manager.getMe());
 //         broadcast our existence every 10 seconds
-        broadcasterThread = new CancellableThread() {
+        broadcasterThread = new Thread() {
             @Override
             public void run() {
-                while (!isCancelled) {
+                while (!isInterrupted()) {
                     broadcaster.run();
                     try {
                         Thread.sleep(5000);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        break;
                     }
                 }
+                System.err.println("Exiting broadcaster thread!");
             }
         };
         broadcasterThread.start();
 
-        gossipReceiverThread = new CancellableThread() {
+        gossipReceiverThread = new Thread() {
             @Override
             public void run() {
-                while (!isCancelled) {
+                while (!isInterrupted()) {
                     gossipReceiver.receiveNodeList();
                 }
+                System.err.println("Exiting gossip receiver thread!");
             }
         };
         gossipReceiverThread.start();
 
-        gossipSenderThread = new CancellableThread() {
+        gossipSenderThread = new Thread() {
             @Override
             public void run() {
-                while (!isCancelled) {
+                while (!isInterrupted()) {
                     gossipSender.gossip();
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        break;
                     }
                 }
+                System.err.println("Exiting gossip sender thread!");
             }
         };
         gossipSenderThread.start();
     }
 
-    /**
-     * Small extension of Thread so that we can cancel the inner loop of run easily, and
-     * let another thread join them.
-     *
-     * Must join the underlying thread which this wraps around.
-     */
-    private static class CancellableThread extends Thread {
-        protected volatile boolean isCancelled = false;
-
-        public void cancel() {
-            isCancelled = true;
-        }
-    }
 }

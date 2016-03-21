@@ -9,7 +9,7 @@ import java.net.*;
  * This class listens for UDP broadcasts from any clients interested in gathering this node's information. It responds
  * according to the behavior determined by the listener allowing us to customize the behavior easily.
  */
-public class NetworkDiscoveryReceiver extends Thread implements Runnable {
+public class NetworkDiscoveryReceiver implements Runnable {
 
     private NetworkDiscoveryListener listener;
     private DatagramSocket socket;
@@ -17,22 +17,21 @@ public class NetworkDiscoveryReceiver extends Thread implements Runnable {
     public NetworkDiscoveryReceiver(NetworkDiscoveryListener listener){
         super();
         this.listener = listener;
-        // create the listening socket on our predetermined port
-        try {
-            this.socket = new DatagramSocket(Constants.NETWORK_DISCOVERY_PORT);
-            this.socket.setReuseAddress(true);
-            this.socket.setSoTimeout(4000);
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
+    }
 
+
+    public DatagramSocket getSocket() {
+        return socket;
     }
 
     /**
      * Listens for a broadcast, and calls onNodeDiscovered to determine the response behavior.
      */
     public void run() {
+        socket = null;
         try {
+            socket = new DatagramSocket(Constants.NETWORK_DISCOVERY_PORT);
+            socket.setReuseAddress(true);
             //TODO: set max size for buf in Constants, and use it here
             byte[] buf = new byte[1000];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
@@ -42,18 +41,14 @@ public class NetworkDiscoveryReceiver extends Thread implements Runnable {
         } catch (SocketTimeoutException ste) {
             //TODO log at warning level once a logger is implemented
         } catch (SocketException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (socket != null) {
+                socket.close();
+            }
+            socket = null;
         }
-    }
-
-    /**
-     * Closes the socket on system shutdown
-     */
-    @Override
-    public void interrupt() {
-        super.interrupt();
-        socket.close();
     }
 }
