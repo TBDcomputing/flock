@@ -91,7 +91,7 @@ public class ElectionLeader extends ElectionState {
     }
 
     @Override
-    protected void close() {
+    public void close() {
         timer.cancel();
         context.setVoted(false);
     }

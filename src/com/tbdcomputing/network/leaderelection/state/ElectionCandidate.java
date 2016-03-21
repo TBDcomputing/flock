@@ -5,6 +5,8 @@ import com.tbdcomputing.network.leaderelection.message.ElectionMessageType;
 import com.tbdcomputing.network.leaderelection.message.ElectionMessageUtils;
 import org.json.JSONObject;
 
+import java.util.logging.Level;
+
 /**
  * Created by dpho on 3/11/16.
  *
@@ -20,7 +22,7 @@ import org.json.JSONObject;
  *          -> Promote to leader if so
  */
 public class ElectionCandidate extends ElectionState {
-    private int votes = 1; // initialized to 1 as we always vote for ourselves.
+    private int votes = 0; // initialized to 1 as we always vote for ourselves.
 
     public ElectionCandidate(ElectionStateContext e) {
         super(e);
@@ -76,6 +78,7 @@ public class ElectionCandidate extends ElectionState {
      * Start an election by sending a RequestVote to all nodes in the cluster.
      */
     private void startElection() {
+        log.log(Level.INFO, "Starting an election now.");
         JSONObject msg = ElectionMessageUtils.makeMessage(context.getTerm(),
                 context.getMyAddr(), ElectionMessageType.REQUESTVOTE);
         context.getSender().broadcast(msg, context.getManager().getNodes());
@@ -87,7 +90,7 @@ public class ElectionCandidate extends ElectionState {
      * @return should I be promoted?
      */
     private synchronized boolean incrementVote() {
-        return ++votes >= context.getManager().getNodes().size() / 2;
+        return ++votes+1 >= context.getManager().getNodes().size() / 2;
     }
 
     /**
@@ -101,7 +104,8 @@ public class ElectionCandidate extends ElectionState {
     }
 
     @Override
-    protected void close() {
+    public void close() {
         context.setVoted(false);
     }
+
 }

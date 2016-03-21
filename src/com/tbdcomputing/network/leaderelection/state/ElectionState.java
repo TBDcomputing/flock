@@ -6,11 +6,14 @@ import org.json.JSONObject;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Standard ElectionState class which Followers, Candidates, and Leaders extend.
  */
 public abstract class ElectionState {
+    protected final Logger log = Logger.getLogger(ElectionState.class.getName());
     protected ElectionStateContext context;
 
     public ElectionState(ElectionStateContext e) {
@@ -90,7 +93,7 @@ public abstract class ElectionState {
     /**
      * Clean up the state prior to transitioning.
      */
-    protected abstract void close();
+    public abstract void close();
 
     /**
      * Transitions into another state.
@@ -104,10 +107,13 @@ public abstract class ElectionState {
 
         switch (type) {
             case LEADER:
+                log.log(Level.INFO, "Transitioning into LeaderState at term #{0}.", context.getTerm());
                 return new ElectionLeader(this.context);
             case CANDIDATE:
+                log.log(Level.INFO, "Transitioning into CandidateState at term #{0}.", context.getTerm());
                 return new ElectionCandidate(this.context);
             case FOLLOWER:
+                log.log(Level.INFO, "Transitioning into FollowerState at term #{0}.", context.getTerm());
                 return new ElectionFollower(this.context);
             default:
                 return null;

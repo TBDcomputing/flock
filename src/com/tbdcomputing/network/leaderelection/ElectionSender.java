@@ -10,6 +10,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Sends messages to other servers.
@@ -17,13 +19,14 @@ import java.util.List;
  * Created by dpho on 3/18/16.
  */
 public class ElectionSender {
+    private final Logger log = Logger.getLogger(ElectionSender.class.getName());
     DatagramSocket socket;
 
     public ElectionSender() {
         try {
             socket = new DatagramSocket();
         } catch (SocketException e) {
-            e.printStackTrace();
+            log.log(Level.SEVERE, e.toString(), e);
         }
     }
 
@@ -33,7 +36,7 @@ public class ElectionSender {
             DatagramPacket packet = new DatagramPacket(buf, buf.length, dst, Constants.ELECTION_RECEIVE_PORT);
             socket.send(packet);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.log(Level.SEVERE, e.toString(), e);
         }
     }
 

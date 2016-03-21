@@ -59,7 +59,7 @@ public class ElectionFollower extends ElectionState {
     }
 
     @Override
-    protected void close() {
+    public void close() {
         context.setVoted(false);
     }
 }
