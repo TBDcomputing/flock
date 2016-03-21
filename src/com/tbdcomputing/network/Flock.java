@@ -123,7 +123,7 @@ public class Flock {
 
     private static void startElection() {
         election = new ElectionManager(manager);
-        election.run();
+        election.start();
     }
 
     private static void run() {

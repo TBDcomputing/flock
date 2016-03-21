@@ -13,7 +13,7 @@ public class ElectionMessageUtils {
         JSONObject obj = new JSONObject();
 
         obj.put("term", term);
-        obj.put("sender", from.toString());
+        obj.put("sender", from.getHostAddress());
 
         switch (messageType) {
             case REQUESTVOTE:
