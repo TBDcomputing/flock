@@ -63,11 +63,13 @@ public class ElectionCandidate extends ElectionState {
     public ElectionState handleVoteGranted(JSONObject message) {
         ElectionState result = this;
 
+        log.log(Level.INFO, "I received a vote!");
+
         long term = message.getLong("term");
         if (term > context.getTerm()) {
             context.setTerm(term);
             result = transition(ElectionStateType.FOLLOWER);
-        } else if (term == context.getTerm() && incrementVote()) {
+        } else if (term <= context.getTerm() && incrementVote()) {
             result = transition(ElectionStateType.LEADER);
         }
 

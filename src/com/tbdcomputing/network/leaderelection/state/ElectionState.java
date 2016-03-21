@@ -74,6 +74,7 @@ public abstract class ElectionState {
      */
     protected void sendVote(JSONObject msg, String sender) {
         try {
+            log.log(Level.INFO, "SENDING VOTE TO " + sender);
             // Extract addr from the message to send your vote to
             InetAddress voteDst = InetAddress.getByName(sender);
 
