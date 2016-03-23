@@ -1,5 +1,7 @@
 package com.tbdcomputing.network;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.*;
@@ -48,6 +50,23 @@ public class Constants {
         for (String name: addressByNetwork.keySet()) {
             if (PREFERRED_NETWORK_INTERFACES.contains(name)) {
                 return addressByNetwork.get(name);
+            }
+        }
+
+        return null;
+    }
+
+    public static InetAddress findLocalAddress() throws SocketException {
+        Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+
+        while (networkInterfaces.hasMoreElements()) {
+            NetworkInterface network = networkInterfaces.nextElement();
+            Enumeration<InetAddress> inetInterfaces = network.getInetAddresses();
+            while (inetInterfaces.hasMoreElements()) {
+                InetAddress addr = inetInterfaces.nextElement();
+                if (addr instanceof Inet4Address && !addr.isLinkLocalAddress() && !addr.isLoopbackAddress()) {
+                    return addr;
+                }
             }
         }
 

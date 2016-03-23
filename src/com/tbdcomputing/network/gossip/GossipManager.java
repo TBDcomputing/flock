@@ -22,9 +22,10 @@ public class GossipManager {
         nodeMap = Collections.synchronizedMap(new HashMap<String, GossipNode>());
         me = new GossipNode();
         try {
-            me.setAddr(InetAddress.getLocalHost());
-        } catch (UnknownHostException e) {
+            me.setAddr(Constants.findLocalAddress());
+        } catch (SocketException e) {
             e.printStackTrace();
+            throw new RuntimeException("Couldn't find your local address!");
         }
 //        nodes.add(me);
 //        nodeMap.put(me.getUUID(), me);
