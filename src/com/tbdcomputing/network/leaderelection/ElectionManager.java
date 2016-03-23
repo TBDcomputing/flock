@@ -7,6 +7,7 @@ import com.tbdcomputing.network.leaderelection.state.ElectionStateContext;
 import com.tbdcomputing.network.leaderelection.state.ElectionStateType;
 import org.json.JSONObject;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -35,6 +36,10 @@ public class ElectionManager extends Thread {
         while (!Thread.interrupted()) {
             JSONObject message;
             if ((message = listener.listen()) != null) {
+
+                log.log(Level.INFO, "Received a {0} message from {1}.",
+                        new String[]{message.getString("type"), message.getString("sender")});
+
                 switch (message.getString("type")) {
                     case "requestvote":
                         state = state.handleRequestVote(message);

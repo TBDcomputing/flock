@@ -67,7 +67,7 @@ public abstract class ElectionListener extends Thread {
             this.socket = new DatagramSocket(Constants.ELECTION_RECEIVE_PORT);
             this.socket.setReuseAddress(true);
             this.socket.setSoTimeout(timeout);
-            log.log(Level.INFO, "Timeout is now set to {0} ms.", timeout);
+            // log.log(Level.INFO, "Timeout is now set to {0} ms.", timeout);
         } catch (SocketException se) {
             log.log(Level.SEVERE, se.toString(), se);
         }

@@ -21,7 +21,6 @@ import java.util.logging.Level;
  *      -> Record the vote and check if n/2 threshold has been reached.
  *          -> Promote to leader if so
  */
-
 public class ElectionCandidate extends ElectionState {
     private int votes = 1; // initialized to 1 as we always vote for ourselves.
 
@@ -64,8 +63,6 @@ public class ElectionCandidate extends ElectionState {
     public ElectionState handleVoteGranted(JSONObject message) {
         ElectionState result = this;
 
-        log.log(Level.INFO, "I received a vote!");
-
         long term = message.getLong("term");
         if (term > context.getTerm()) {
             context.setTerm(term);
@@ -94,7 +91,8 @@ public class ElectionCandidate extends ElectionState {
      */
     private synchronized boolean incrementVote() {
         votes++;
-        log.log(Level.INFO, "I have this many votes " + (votes) + " and I need at least {0}.", ((context.getManager().getNodes().size() + 1) / 2) + 1);
+        log.log(Level.INFO, "I have {0} votes and I need at least {1}.",
+                new int[]{votes, ((context.getManager().getNodes().size() + 1) / 2) + 1});
         return votes >= ((context.getManager().getNodes().size() + 1) / 2) + 1;
     }
 
