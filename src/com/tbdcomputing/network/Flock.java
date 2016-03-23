@@ -99,6 +99,10 @@ public class Flock {
                 }
                 gossipSenderThread.interrupt();
                 gossipReceiverThread.interrupt();
+                // stopping leader election
+                if (election != null) {
+                    election.interrupt();
+                }
                 // we close the socket so that the interrupt will succeed
                 if (gossipReceiver.getSocket() != null) {
                     gossipReceiver.getSocket().close();
@@ -108,11 +112,13 @@ public class Flock {
                     broadcasterThread.join();
                     gossipSenderThread.join();
                     gossipReceiverThread.join();
+                    if (election != null) {
+                        election.join();
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                // stopping leader election
-                election.interrupt();
+
                 System.out.println("System shutdown complete, later tater!");
                 break;
             } else if (cmd.toLowerCase().equals("elect") && running) {
