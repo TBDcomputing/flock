@@ -32,7 +32,7 @@ public class ElectionManager extends Thread {
     public void run() {
         state = new ElectionFollower(new ElectionStateContext(manager, new ElectionSender()));
         listener.setSocketTimeout(state.getTimeout());
-        while (true) {
+        while (!Thread.interrupted()) {
             JSONObject message;
             if ((message = listener.listen()) != null) {
                 switch (message.getString("type")) {
