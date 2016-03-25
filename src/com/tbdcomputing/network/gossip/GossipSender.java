@@ -1,6 +1,5 @@
 package com.tbdcomputing.network.gossip;
 
-import com.sun.javafx.scene.control.skin.VirtualFlow;
 import com.tbdcomputing.network.Constants;
 import com.tbdcomputing.network.utils.GossipListUtils;
 import org.json.JSONArray;
