@@ -46,7 +46,8 @@ public abstract class ElectionListener extends Thread {
             log.log(Level.INFO, "Socket timed out! Reverting to CandidateState.");
             onTimeout();
         } catch (SocketException e) {
-            log.log(Level.SEVERE, e.toString(), e);
+            // Expected to be thrown when the "quit" command is given.
+            // log.log(Level.SEVERE, e.toString(), e);
         } catch (IOException ioe) {
             log.log(Level.SEVERE, ioe.toString(), ioe);
         }
@@ -66,7 +67,7 @@ public abstract class ElectionListener extends Thread {
             this.socket = new DatagramSocket(Constants.ELECTION_RECEIVE_PORT);
             this.socket.setReuseAddress(true);
             this.socket.setSoTimeout(timeout);
-            log.log(Level.INFO, "Timeout is now set to {0} ms.", timeout);
+            // log.log(Level.INFO, "Timeout is now set to {0} ms.", timeout);
         } catch (SocketException se) {
             log.log(Level.SEVERE, se.toString(), se);
         }

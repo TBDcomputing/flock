@@ -63,8 +63,6 @@ public class ElectionCandidate extends ElectionState {
     public ElectionState handleVoteGranted(JSONObject message) {
         ElectionState result = this;
 
-        log.log(Level.INFO, "I received a vote!");
-
         long term = message.getLong("term");
         if (term > context.getTerm()) {
             context.setTerm(term);
@@ -92,8 +90,10 @@ public class ElectionCandidate extends ElectionState {
      * @return should I be promoted?
      */
     private synchronized boolean incrementVote() {
-        log.log(Level.INFO, "I have this many votes "+ (++votes) + " and I need at least {0}.", context.getManager().getNodes().size() / 2);
-        return votes >= context.getManager().getNodes().size() / 2;
+        votes++;
+        log.log(Level.INFO, "I have {0} votes and I need at least {1}.",
+                new int[]{votes, ((context.getManager().getNodes().size() + 1) / 2) + 1});
+        return votes >= ((context.getManager().getNodes().size() + 1) / 2) + 1;
     }
 
     /**
