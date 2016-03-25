@@ -28,15 +28,15 @@ public class Constants {
         return null;
     }
 
-    private static List<String> PREFERRED_NETWORK_INTERFACES = Arrays.asList("wlan0", "en0", "en1", "en2");
+    private static List<String> PREFERRED_NETWORK_INTERFACES = Arrays.asList("wlan0", "en0", "en1", "en2", "eth0");
     public static String searchForMac() throws SocketException {
         Map<String, String> addressByNetwork =  new HashMap<>();
         Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
 
         while (networkInterfaces.hasMoreElements()) {
             NetworkInterface network = networkInterfaces.nextElement();
-
             byte[] bmac = network.getHardwareAddress();
+
             if (bmac != null && bmac.length > 0 ) {
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < bmac.length; i++){
