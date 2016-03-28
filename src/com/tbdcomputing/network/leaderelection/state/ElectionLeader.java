@@ -3,6 +3,7 @@ package com.tbdcomputing.network.leaderelection.state;
 import com.tbdcomputing.network.leaderelection.ElectionSettings;
 import com.tbdcomputing.network.leaderelection.message.ElectionMessageType;
 import com.tbdcomputing.network.leaderelection.message.ElectionMessageUtils;
+import com.tbdcomputing.network.utils.ExperimentUtils;
 import org.json.JSONObject;
 
 import java.util.Timer;
@@ -53,8 +54,10 @@ public class ElectionLeader extends ElectionState {
 
         long term = message.getLong("term");
         if (term == context.getTerm()) {
+            ExperimentUtils.electionStopTimeIsSet = false;
             result = transition(ElectionStateType.CANDIDATE);
         } else if (term > context.getTerm()) {
+            ExperimentUtils.electionStopTimeIsSet = false;
             context.setTerm(term);
             result = transition(ElectionStateType.FOLLOWER);
         }
@@ -78,6 +81,11 @@ public class ElectionLeader extends ElectionState {
     private void sendHeartbeat() {
         JSONObject msg = ElectionMessageUtils.makeMessage(context.getTerm(), context.getMyAddr(), ElectionMessageType.HEARTBEAT);
         context.getSender().broadcast(msg, context.getManager().getNodes());
+        if(!ExperimentUtils.electionStopTimeIsSet){
+            ExperimentUtils.electionStopTime = System.currentTimeMillis();
+            ExperimentUtils.electionStopTimeIsSet = true;
+            System.out.println("leader elected at: " + ExperimentUtils.electionStopTime);
+        }
     }
 
     /**

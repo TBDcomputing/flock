@@ -5,6 +5,8 @@ import com.tbdcomputing.network.discovery.NetworkDiscoveryListener;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryReceiver;
 import com.tbdcomputing.network.gossip.*;
 import com.tbdcomputing.network.leaderelection.ElectionManager;
+import com.tbdcomputing.network.leaderelection.ElectionSettings;
+import com.tbdcomputing.network.utils.ExperimentUtils;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -78,14 +80,22 @@ public class Flock {
 
     public static void main(String[] args) {
 
-        //TODO add a startup command probably with apache cli and then also a preferences object
         Scanner cmdLine = new Scanner(System.in);
         while (true) {
-            String cmd = cmdLine.nextLine();
-            if (cmd.toLowerCase().equals("start") && !running) {
+            String[] cmd = cmdLine.nextLine().split("\\s+");
+            for(int i = 0; i < cmd.length; i++){
+                cmd[i] = cmd[i].toLowerCase();
+            }
+            if (cmd[0].equals("start") && !running) {
                 running = true;
+                if(cmd.length == 2 && cmd[1].equals("proxy")){
+                    ExperimentUtils.PROXY_MODE = true;
+
+                    ExperimentUtils.refreshClusterAddressList();
+                }
                 run();
-            } else if (cmd.toLowerCase().equals("quit") && running) {
+
+            } else if (cmd[0].equals("quit") && running) {
                 System.out.println("system shutting down...");
                 manager.getMe().setStatus(GossipStatus.LEAVING);
                 gossipSender.gossip();
@@ -121,7 +131,7 @@ public class Flock {
 
                 System.out.println("System shutdown complete, later tater!");
                 break;
-            } else if (cmd.toLowerCase().equals("elect") && running) {
+            } else if (cmd[0].equals("elect") && running) {
                 startElection();
             }
         }
@@ -129,6 +139,8 @@ public class Flock {
 
     private static void startElection() {
         election = new ElectionManager(manager);
+        ExperimentUtils.electionStartTime = System.currentTimeMillis();
+        System.out.println("Election commenced at: "+ ExperimentUtils.electionStartTime);
         election.start();
     }
 

@@ -2,6 +2,7 @@ package com.tbdcomputing.network.leaderelection;
 
 import com.tbdcomputing.network.Constants;
 import com.tbdcomputing.network.gossip.GossipNode;
+import com.tbdcomputing.network.utils.ExperimentUtils;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -41,8 +42,15 @@ public class ElectionSender {
     }
 
     public void broadcast(JSONObject msg, List<GossipNode> cluster) {
-        for (GossipNode node : cluster) {
-            sendMessage(msg, node.getAddr());
+        if(ExperimentUtils.PROXY_MODE) {
+            for(InetAddress nodeAddress : ExperimentUtils.clusterAddresses) {
+                sendMessage(msg, nodeAddress);
+            }
+        }else{
+            for (GossipNode node : cluster) {
+                sendMessage(msg, node.getAddr());
+            }
         }
+
     }
 }
