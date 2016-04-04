@@ -1,8 +1,11 @@
 package com.tbdcomputing.network.utils;
 
+import com.tbdcomputing.network.Constants;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -17,6 +20,7 @@ public class ExperimentUtils {
     public static long electionStartTime;
     public static long electionStopTime;
     public static boolean electionStopTimeIsSet = false;
+    public static final String ELECTION_LOG_FP = "/home/ubuntu/election.txt";
 
     /**
      * Reads in the proxy list of IP addresses for circumventing gossip and network discovery
@@ -27,15 +31,20 @@ public class ExperimentUtils {
         clusterAddresses = new ArrayList<InetAddress>();
         try {
             Scanner in = new Scanner(file);
-
             while(in.hasNextLine()){
-                String IPAddressStr = in.next();
-                clusterAddresses.add(InetAddress.getByName(IPAddressStr));
+                String IPAddressStr = in.nextLine();
+                System.out.println(IPAddressStr);
+                InetAddress address = InetAddress.getByName(IPAddressStr);
+                if(!Constants.findLocalAddress().equals(address)){
+                    clusterAddresses.add(address);
+                }
             }
             in.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (SocketException e) {
             e.printStackTrace();
         }
 

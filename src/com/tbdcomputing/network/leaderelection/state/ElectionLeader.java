@@ -6,6 +6,10 @@ import com.tbdcomputing.network.leaderelection.message.ElectionMessageUtils;
 import com.tbdcomputing.network.utils.ExperimentUtils;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -84,6 +88,12 @@ public class ElectionLeader extends ElectionState {
         if(!ExperimentUtils.electionStopTimeIsSet){
             ExperimentUtils.electionStopTime = System.currentTimeMillis();
             ExperimentUtils.electionStopTimeIsSet = true;
+
+            try {
+                Files.write(Paths.get(ExperimentUtils.ELECTION_LOG_FP ), ("\nleader elected at: " + ExperimentUtils.electionStopTime).getBytes(), StandardOpenOption.APPEND);
+            }catch (IOException e) {
+                //exception handling left as an exercise for the reader
+            }
             System.out.println("leader elected at: " + ExperimentUtils.electionStopTime);
         }
     }

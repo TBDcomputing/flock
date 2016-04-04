@@ -9,9 +9,15 @@ import com.tbdcomputing.network.leaderelection.ElectionSettings;
 import com.tbdcomputing.network.utils.ExperimentUtils;
 import org.json.JSONObject;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.SocketException;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
@@ -128,10 +134,19 @@ public class Flock {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
                 System.out.println("System shutdown complete, later tater!");
                 break;
             } else if (cmd[0].equals("elect") && running) {
+
+                if(ExperimentUtils.PROXY_MODE){
+                    long start_time = Long.parseLong(cmd[1]);
+                    long cur_time = System.currentTimeMillis();
+                    try {
+                        Thread.sleep(start_time-cur_time);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
                 startElection();
             }
         }
@@ -140,7 +155,29 @@ public class Flock {
     private static void startElection() {
         election = new ElectionManager(manager);
         ExperimentUtils.electionStartTime = System.currentTimeMillis();
-        System.out.println("Election commenced at: "+ ExperimentUtils.electionStartTime);
+
+        try{
+            File file = new File(ExperimentUtils.ELECTION_LOG_FP);
+
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+
+            FileWriter fw = null;
+
+            fw = new FileWriter(file.getAbsoluteFile());
+
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            bw.write("Election commenced at: "+ ExperimentUtils.electionStartTime);
+            System.out.println("Election commenced at: "+ ExperimentUtils.electionStartTime);
+
+            bw.close();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+
         election.start();
     }
 
