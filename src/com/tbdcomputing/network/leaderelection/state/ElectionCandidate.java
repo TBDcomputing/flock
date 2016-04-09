@@ -5,6 +5,8 @@ import com.tbdcomputing.network.leaderelection.message.ElectionMessageType;
 import com.tbdcomputing.network.leaderelection.message.ElectionMessageUtils;
 import org.json.JSONObject;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 
 /**
@@ -46,6 +48,11 @@ public class ElectionCandidate extends ElectionState {
         long term = message.getLong("term");
         if (term >= context.getTerm()) {
             context.setTerm(term);
+            try {
+                context.setLeaderAddr(InetAddress.getByName(message.getString("sender")));
+            } catch (UnknownHostException e) {
+                log.log(Level.SEVERE, "Cannot find leader node's address. It has died, or there is a serious problem.");
+            }
             result = transition(ElectionStateType.FOLLOWER);
         }
 

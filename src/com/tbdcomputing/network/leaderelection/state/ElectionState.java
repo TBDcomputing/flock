@@ -61,6 +61,14 @@ public abstract class ElectionState {
         long term = message.getLong("term");
         if (term > context.getTerm()) {
             context.setTerm(term);
+
+            if ("heartbeat".equals(message.getString("type"))) {
+                try {
+                    context.setLeaderAddr(InetAddress.getByName(message.getString("sender")));
+                } catch (UnknownHostException e) {
+                    log.log(Level.SEVERE, "Cannot find leader node's address. It has died, or there is a serious problem.");
+                }
+            }
             result = transition(ElectionStateType.FOLLOWER);
         }
 

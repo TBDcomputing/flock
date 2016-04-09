@@ -7,11 +7,14 @@ import com.tbdcomputing.network.utils.ExperimentUtils;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Level;
 
 /**
  * Created by dpho on 3/11/16.
@@ -22,7 +25,7 @@ import java.util.TimerTask;
  */
 public class ElectionLeader extends ElectionState {
     private Timer timer; // timer has a task running to send out heartbeats at specific intervals
-                            // reference is kept in order to stop the task if this server is no longer leader
+    // reference is kept in order to stop the task if this server is no longer leader
 
     /**
      * Constructor for ElectionLeader. Start a new TimerTask that will send out heartbeats every HEARTBEAT_INTERVAL.
@@ -63,6 +66,11 @@ public class ElectionLeader extends ElectionState {
         } else if (term > context.getTerm()) {
             ExperimentUtils.electionStopTimeIsSet = false;
             context.setTerm(term);
+            try {
+                context.setLeaderAddr(InetAddress.getByName(message.getString("sender")));
+            } catch (UnknownHostException e) {
+                log.log(Level.SEVERE, "Cannot find leader node's address. It has died, or there is a serious problem.");
+            }
             result = transition(ElectionStateType.FOLLOWER);
         }
 
@@ -85,13 +93,13 @@ public class ElectionLeader extends ElectionState {
     private void sendHeartbeat() {
         JSONObject msg = ElectionMessageUtils.makeMessage(context.getTerm(), context.getMyAddr(), ElectionMessageType.HEARTBEAT);
         context.getSender().broadcast(msg, context.getManager().getNodes());
-        if(!ExperimentUtils.electionStopTimeIsSet){
+        if (!ExperimentUtils.electionStopTimeIsSet) {
             ExperimentUtils.electionStopTime = System.currentTimeMillis();
             ExperimentUtils.electionStopTimeIsSet = true;
 
             try {
-                Files.write(Paths.get(ExperimentUtils.ELECTION_LOG_FP ), ("\nleader elected at: " + ExperimentUtils.electionStopTime).getBytes(), StandardOpenOption.APPEND);
-            }catch (IOException e) {
+                Files.write(Paths.get(ExperimentUtils.ELECTION_LOG_FP), ("\nleader elected at: " + ExperimentUtils.electionStopTime).getBytes(), StandardOpenOption.APPEND);
+            } catch (IOException e) {
                 //exception handling left as an exercise for the reader
             }
             System.out.println("leader elected at: " + ExperimentUtils.electionStopTime);

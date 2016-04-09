@@ -16,6 +16,7 @@ public class ElectionStateContext {
     private InetAddress myAddr;
     private long term = 0;
     private boolean voted = false;
+    private InetAddress leaderAddr;
 
     public ElectionStateContext(GossipManager manager, ElectionSender sender) {
         this.manager = manager;
@@ -65,5 +66,13 @@ public class ElectionStateContext {
 
     public void setMyAddr(InetAddress myAddr) {
         this.myAddr = myAddr;
+    }
+
+    public InetAddress getLeaderAddr() {
+        return leaderAddr;
+    }
+
+    public void setLeaderAddr(InetAddress leaderAddr) {
+        this.leaderAddr = leaderAddr;
     }
 }
