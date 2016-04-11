@@ -94,7 +94,7 @@ public class GossipSender {
             }
 
             // Merge node lists.
-            GossipListUtils.mergeList(nodes, otherNodes, manager.getNodeMap());
+            manager.mergeList(otherNodes);
         } catch (SocketException e) {
             e.printStackTrace();
         } catch (SocketTimeoutException e) {

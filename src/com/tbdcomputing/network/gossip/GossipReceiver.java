@@ -62,10 +62,10 @@ public class GossipReceiver {
             }
 
             // Generate the diff list of nodes.
-            List<GossipNode> diffNodes = GossipListUtils.generateDiffList(nodes, otherNodes, nodeMap);
+            List<GossipNode> diffNodes = manager.generateDiffList(otherNodes);
 
             // Merge our list with the diff list.
-            GossipListUtils.mergeList(nodes, diffNodes, nodeMap);
+            manager.mergeList(diffNodes);
 
             // Send the diff list back to the other node.
             JSONArray json = new JSONArray(diffNodes.parallelStream().map(GossipNode::toJSON).toArray());
