@@ -1,4 +1,4 @@
-#!/usr/bin/env/ python
+#!/usr/bin/env python
 
 import cmd
 import glob
@@ -106,6 +106,9 @@ class CLI(cmd.Cmd):
         else:
             readline.parse_and_bind("tab: complete")
         readline.set_completer(self.complete)
+
+    def emptyline(self):
+        pass
 
     def do_submit(self, s):
         argv = s.split()
