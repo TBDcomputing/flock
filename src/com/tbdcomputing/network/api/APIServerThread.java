@@ -50,6 +50,8 @@ public class APIServerThread extends Thread implements Observer {
                     break;
                 }
             }
+            out.close();
+            in.close();
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -80,6 +82,15 @@ public class APIServerThread extends Thread implements Observer {
 
         } else if(inputLine.contains("broadcast")) {
             // TODO: parse command and send it to each node.
+            // TODO: should I just be sending messages through gossip?
+            List<GossipNode> nodes = gossipManager.getNodes();
+
+            // Parse command
+            String command = inputLine.substring(inputLine.lastIndexOf("broadcast"));
+
+            for(GossipNode node : nodes) {
+
+            }
 
         }
 
@@ -88,14 +99,21 @@ public class APIServerThread extends Thread implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        // TODO: add support for sending new node when GossipManager gets a new node by moving GossipListUtils in
-        // to GossipManager.  Then calling the proper methods.  When addNode is called, fire off an observable event?
-        // THen in here be an observer of the gossipmanager/electionmanager?  ALso fire off that event in gossipmanager.removeall.
+        // TODO: possibly take arg in as JSON instead of object.  Allows for having removed or added events.
+        // Support sending new node when GossipManager gets a new node When addNode is called, observers are notified.
         if(o == gossipManager) {
             GossipNode node = (GossipNode) arg;
             JSONObject json = node.toJSON();
 
-            // TODO: send json to middleware
+            // send json to middleware
+            try {
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                out.println(json.toString());
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 }
