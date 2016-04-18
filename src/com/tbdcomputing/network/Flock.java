@@ -5,6 +5,7 @@ import com.tbdcomputing.network.discovery.NetworkDiscoveryListener;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryReceiver;
 import com.tbdcomputing.network.gossip.*;
 import com.tbdcomputing.network.leaderelection.ElectionManager;
+import com.tbdcomputing.network.leaderelection.bully.BullyElectionManager;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -74,7 +75,7 @@ public class Flock {
     private static Thread broadcasterThread;
     private static NetworkDiscoveryBroadcaster broadcaster;
 
-    private static ElectionManager election;
+    private static BullyElectionManager election;
 
     public static void main(String[] args) {
 
@@ -128,7 +129,7 @@ public class Flock {
     }
 
     private static void startElection() {
-        election = new ElectionManager(manager);
+        election = new BullyElectionManager(manager);
         election.start();
     }
 
