@@ -2,6 +2,7 @@ package com.tbdcomputing.network.api;
 
 import com.tbdcomputing.network.Constants;
 import com.tbdcomputing.network.gossip.GossipManager;
+import com.tbdcomputing.network.leaderelection.ElectionManager;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -17,12 +18,14 @@ import java.util.List;
 public class APIServer {
     private ServerSocket serverSocket;
     private GossipManager gossipManager;
+    private ElectionManager electionManager;
     private List<APIServerThread> threads;
     private boolean listening;
 
-    public APIServer(GossipManager manager) {
+    public APIServer(GossipManager gossipManager, ElectionManager electionManager) {
         super();
-        gossipManager = manager;
+        this.gossipManager = gossipManager;
+        this.electionManager = electionManager;
         listening = true;
         threads = new LinkedList<>();
 
@@ -38,7 +41,7 @@ public class APIServer {
     public void run() {
         while (listening) {
             try {
-                APIServerThread connection = new APIServerThread(serverSocket.accept(), gossipManager, this);
+                APIServerThread connection = new APIServerThread(serverSocket.accept(), gossipManager, electionManager, this);
                 threads.add(connection);
                 connection.start();
             } catch (IOException e) {

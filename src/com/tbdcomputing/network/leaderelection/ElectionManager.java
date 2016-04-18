@@ -61,6 +61,10 @@ public class ElectionManager extends Thread {
         }
     }
 
+    public ElectionState getElectionState() {
+        return state;
+    }
+
     /**
      * Closes the socket on system shutdown
      */
