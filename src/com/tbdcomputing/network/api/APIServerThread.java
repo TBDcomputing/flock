@@ -6,6 +6,7 @@ import com.tbdcomputing.network.gossip.GossipNode;
 import com.tbdcomputing.network.gossip.GossipStatus;
 import com.tbdcomputing.network.leaderelection.ElectionManager;
 import com.tbdcomputing.network.leaderelection.state.ElectionState;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -38,6 +40,7 @@ public class APIServerThread extends Thread implements Observer {
         apiServer = server;
         gossipManager.addObserver(this);
         electionManager.getElectionState().addObserver(this);
+
     }
 
 
@@ -73,6 +76,7 @@ public class APIServerThread extends Thread implements Observer {
         JSONObject input = new JSONObject(inputLine);
 
         if (input.get("type").toString().equals("nodelist")) {
+
             List<GossipNode> nodes = gossipManager.getNodes();
 
             ArrayList<GossipNode> copyNodes = new ArrayList<>(nodes);
@@ -121,6 +125,7 @@ public class APIServerThread extends Thread implements Observer {
 
         } else if(input.get("type").toString().equals("flock_command")) {
             // TODO: do stuff for docker list?
+
         }
 
         return "unsubscribe";
@@ -155,6 +160,7 @@ public class APIServerThread extends Thread implements Observer {
             out.close();
         } catch (IOException e) {
             e.printStackTrace();
+
         }
     }
 }

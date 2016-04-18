@@ -4,6 +4,7 @@ import com.tbdcomputing.network.Constants;
 import com.tbdcomputing.network.gossip.GossipManager;
 import com.tbdcomputing.network.leaderelection.ElectionManager;
 
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.SocketException;
@@ -26,6 +27,7 @@ public class APIServer {
         super();
         this.gossipManager = gossipManager;
         this.electionManager = electionManager;
+
         listening = true;
         threads = new LinkedList<>();
 
@@ -42,6 +44,7 @@ public class APIServer {
         while (listening) {
             try {
                 APIServerThread connection = new APIServerThread(serverSocket.accept(), gossipManager, electionManager, this);
+
                 threads.add(connection);
                 connection.start();
             } catch (IOException e) {
