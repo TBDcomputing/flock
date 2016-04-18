@@ -119,12 +119,9 @@ public class APIServerThread extends Thread implements Observer {
 
             return "";
 
-        } else if(input.get("type").toString().equals("receive_command")) {
-            // TODO: send back if you have the image
-
-
-        } else if(input.get("type").toString().equals("flock_command")) {
-            // TODO: do stuff for docker list?
+        } else if(input.get("type").toString().equals("run_image")) {
+            // TODO: Start image on all nodes that have this image
+            // TODO: get back container info from nodes that we send this command to.
 
         }
 
@@ -139,6 +136,7 @@ public class APIServerThread extends Thread implements Observer {
         if(o == gossipManager) {
             GossipNode node = (GossipNode) arg;
             json = node.toJSON();
+            json.put("type", "new_node");
 
         } else {
             // if (o == electionManager.getElectionState())
