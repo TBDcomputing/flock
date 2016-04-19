@@ -31,6 +31,8 @@ public class BullyElectionCandidate extends BullyElectionState {
     public BullyElectionState handleElection(JSONObject message) {
         // TODO: Change to Double
         String alpha = message.getString("alpha");
+
+        System.err.printf("Comparing alpha: %s to my alpha: %s\n", alpha, this.context.getAlpha());
         if (alpha.compareTo(this.context.getAlpha()) >= 0) {
             return transition(BullyElectionStateType.FOLLOWER);
         } else {
@@ -56,7 +58,7 @@ public class BullyElectionCandidate extends BullyElectionState {
      */
     @Override
     public int getTimeout() {
-        return BullyElectionSettings.MINIMUM_TIMEOUT + (int) (Math.random() * BullyElectionSettings.ELECTION_TIMEOUT_SEED);
+        return BullyElectionSettings.CANDIDATE_TIMEOUT;
     }
 
     @Override

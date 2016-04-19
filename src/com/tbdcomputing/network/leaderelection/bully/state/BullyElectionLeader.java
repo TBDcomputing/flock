@@ -37,7 +37,7 @@ public class BullyElectionLeader extends BullyElectionState {
             public void run() {
                 sendSuppression();
             }
-        }, 0, BullyElectionSettings.HEARTBEAT_INTERVAL);
+        }, 0, BullyElectionSettings.SITDOWN_INTERVAL);
     }
 
     @Override
