@@ -129,8 +129,7 @@ public class Flock {
     }
 
     private static void startElection() {
-        election = new BullyElectionManager(manager);
-        election.start();
+        election.startElection();
     }
 
     private static void run() {
@@ -193,6 +192,9 @@ public class Flock {
             }
         };
         gossipSenderThread.start();
+
+        election = new BullyElectionManager(manager);
+        election.start();
     }
 
 }

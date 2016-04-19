@@ -34,9 +34,10 @@ public class BullyElectionManager extends Thread {
 
     }
 
+    @Override
     public void run() {
         state = new BullyElectionFollower(new BullyElectionStateContext(manager, new ElectionSender()));
-        listener.setSocketTimeout(state.getTimeout());
+        listener.setSocketTimeout(0); // start with unlimited timeout
         while (!Thread.interrupted()) {
             JSONObject message;
             if ((message = listener.listen()) != null) {
@@ -49,6 +50,10 @@ public class BullyElectionManager extends Thread {
             // new timeout is dependent on current state
             listener.setSocketTimeout(state.getTimeout());
         }
+    }
+
+    public void startElection() {
+        listener.setSocketTimeout(1);
     }
 
     /**
