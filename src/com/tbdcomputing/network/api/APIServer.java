@@ -20,13 +20,16 @@ public class APIServer {
     private ServerSocket serverSocket;
     private GossipManager gossipManager;
     private ElectionManager electionManager;
+    private APIReceiver receiver;
     private List<APIServerThread> threads;
     private boolean listening;
 
     public APIServer(GossipManager gossipManager, ElectionManager electionManager) {
-        super();
         this.gossipManager = gossipManager;
         this.electionManager = electionManager;
+
+        receiver = new APIReceiver();
+        receiver.run();
 
         listening = true;
         threads = new LinkedList<>();

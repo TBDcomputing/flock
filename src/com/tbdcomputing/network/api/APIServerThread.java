@@ -54,10 +54,13 @@ public class APIServerThread extends Thread implements Observer {
             String inputLine, outputLine;
             while ((inputLine = in.readLine()) != null) {
                 outputLine = processCommand(inputLine);
-                out.println(outputLine);
 
                 if (outputLine.equals("unsubscribe")) {
                     break;
+                }
+
+                if(!outputLine.equals("")) {
+                    out.println(outputLine);
                 }
             }
             out.close();
@@ -68,11 +71,12 @@ public class APIServerThread extends Thread implements Observer {
         } finally {
             apiServer.removeConnection(this);
             gossipManager.deleteObserver(this);
+            electionManager.getElectionState().deleteObserver(this);
         }
 
     }
 
-    private String processCommand(String inputLine) {
+    public String processCommand(String inputLine) {
         JSONObject input = new JSONObject(inputLine);
 
         if (input.get("type").toString().equals("nodelist")) {
@@ -107,14 +111,21 @@ public class APIServerThread extends Thread implements Observer {
             String image = input.get("image").toString();
             List<GossipNode> nodes = gossipManager.getNodes();
 
-            // TODO: Broadcast the image request to all nodes.
+            // TODO: Broadcast the has_image request to all nodes.
             for(GossipNode node : nodes) {
                 JSONObject json = new JSONObject();
                 json.put("type", "receive_command");
                 json.put("image", image);
 
                 // TODO: open tcp socket to another node and send to it.
-//                ServerSocket nodeSocket = new ServerSocket(Constants.API_PORT)
+//                ServerSocket nodeSocket = new ServerSocket(Constants.API_INTERNAL_PORT);
+
+                // TODO: send the json to that node.
+
+                // TODO: get back result of that command.
+
+                // TODO: if that came back true, add node to list of nodes with that image.
+
             }
 
             return "";
@@ -122,6 +133,12 @@ public class APIServerThread extends Thread implements Observer {
         } else if(input.get("type").toString().equals("run_image")) {
             // TODO: Start image on all nodes that have this image
             // TODO: get back container info from nodes that we send this command to.
+            String image = input.get("image").toString();
+            String nodes = input.get("nodes").toString();
+
+            // TODO: open tcp socket to each of the nodes in the JSONArray and send the run_image command to them
+
+            // TODO: add returned container information to JSONAray.
 
         }
 
@@ -147,8 +164,6 @@ public class APIServerThread extends Thread implements Observer {
             json = new JSONObject();
             json.put("type", "new_leader");
             json.put("leader_ip", addr.getHostAddress().toString());
-
-            // TODO: communicate with container to update the leader info
         }
 
         // send json to middleware
