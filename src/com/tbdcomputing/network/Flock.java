@@ -10,6 +10,9 @@ import com.tbdcomputing.network.utils.ExperimentUtils;
 import com.tbdcomputing.network.leaderelection.bully.BullyElectionManager;
 import org.json.JSONObject;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.SocketException;
@@ -149,7 +152,6 @@ public class Flock {
     }
 
     private static void startElection() {
-        election = new ElectionManager(manager);
         ExperimentUtils.electionStartTime = System.currentTimeMillis();
 
         try{
@@ -174,7 +176,7 @@ public class Flock {
             e.printStackTrace();
         }
 
-        election.start();
+        election.startElection();
     }
 
     private static void run() {
