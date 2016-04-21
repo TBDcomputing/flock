@@ -57,6 +57,7 @@ public class Constants {
     }
 
     public static InetAddress findLocalAddress() throws SocketException {
+        Map<String, InetAddress> addressByNetwork =  new HashMap<>();
         Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
 
         while (networkInterfaces.hasMoreElements()) {
@@ -65,8 +66,14 @@ public class Constants {
             while (inetInterfaces.hasMoreElements()) {
                 InetAddress addr = inetInterfaces.nextElement();
                 if (addr instanceof Inet4Address && !addr.isLinkLocalAddress() && !addr.isLoopbackAddress()) {
-                    return addr;
+                    addressByNetwork.put(network.getName(), addr);
                 }
+            }
+        }
+
+        for (String name: addressByNetwork.keySet()) {
+            if (PREFERRED_NETWORK_INTERFACES.contains(name)) {
+                return addressByNetwork.get(name);
             }
         }
 
