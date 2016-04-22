@@ -138,13 +138,16 @@ public class Flock {
             } else if (cmd[0].equals("elect") && running) {
 
                 if(ExperimentUtils.PROXY_MODE){
-                    long start_time = Long.parseLong(cmd[1]);
-                    long cur_time = System.currentTimeMillis();
-                    try {
-                        Thread.sleep(start_time-cur_time);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+
+                    //TODO fix delay
+//                    long start_time = Long.parseLong(cmd[1]);
+//                    long cur_time = System.currentTimeMillis();
+//                    try {
+//                        Thread.sleep(start_time-cur_time);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+
                 }
                 startElection();
             }
