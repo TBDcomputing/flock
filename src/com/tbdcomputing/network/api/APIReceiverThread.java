@@ -1,11 +1,9 @@
 package com.tbdcomputing.network.api;
 
+import com.sun.tools.doclets.internal.toolkit.util.DocFinder;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
 /**
@@ -30,13 +28,11 @@ public class APIReceiverThread extends Thread {
             while ((inputLine = in.readLine()) != null) {
                 outputLine = processCommand(inputLine);
 
-                if (outputLine.equals("unsubscribe")) {
+                if (outputLine.equals("")) {
                     break;
                 }
 
-                if(!outputLine.equals("")) {
-                    out.println(outputLine);
-                }
+                out.println(outputLine);
             }
             out.close();
             in.close();
@@ -53,7 +49,46 @@ public class APIReceiverThread extends Thread {
         if (input.get("type").toString().equals("receive_command")) {
             String image = input.get("image").toString();
 
-            // TODO: check if this image is present by checking output of docker ls?
+            Runtime rt = Runtime.getRuntime();
+
+            if(input.get("command").toString().equals("has_image")) {
+                // check if this image is present by checking output of "docker images"
+                String[] commands = {"docker", "images"};
+
+                try {
+                    Process proc = rt.exec(commands);
+
+                    BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+
+                    String line = null;
+
+                    while( (line = br.readLine()) != null) {
+                        if(line.contains(image)) {
+                            // TODO: Return true
+                            return "true";
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            } else if(input.get("command").toString().equals("run_image")) {
+                String[] commands = {"docker", "start", image};
+
+                try {
+                    Process proc = rt.exec(commands);
+
+                    BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+
+                    String line = null;
+
+                    while( (line = br.readLine()) != null) {
+                        // TODO: Do something with container output
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return "";
     }

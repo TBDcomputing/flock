@@ -110,36 +110,88 @@ public class APIServerThread extends Thread implements Observer {
             // Parse image and send it to each node.
             String image = input.get("image").toString();
             List<GossipNode> nodes = gossipManager.getNodes();
+            nodes.add(gossipManager.getMe());
 
-            // TODO: Broadcast the has_image request to all nodes.
+            List<GossipNode> nodesWithImage = new ArrayList<>();
+
+            JSONObject json = new JSONObject();
+            json.put("type", "receive_command");
+            json.put("command", "has_image");
+            json.put("image", image);
+            
+            // Broadcast the has_image request to all nodes.
             for(GossipNode node : nodes) {
-                JSONObject json = new JSONObject();
-                json.put("type", "receive_command");
-                json.put("image", image);
+                try {
+                    // Open tcp socket to another node and send to it.
+                    Socket nodeSocket = new Socket(node.getAddr(), Constants.API_INTERNAL_PORT);
 
-                // TODO: open tcp socket to another node and send to it.
-//                ServerSocket nodeSocket = new ServerSocket(Constants.API_INTERNAL_PORT);
+                    // Send the json to that node.
+                    PrintWriter out = new PrintWriter(nodeSocket.getOutputStream(), true);
+                    BufferedReader in = new BufferedReader(new InputStreamReader(nodeSocket.getInputStream()));
 
-                // TODO: send the json to that node.
+                    out.println(json.toString());
 
-                // TODO: get back result of that command.
+                    // Get back result of that command.
+                    String result = in.readLine();
 
-                // TODO: if that came back true, add node to list of nodes with that image.
+                    // If that came back true, add node to list of nodes with that image.
+                    if(result.equals("true")) {
+                        nodesWithImage.add(node);
+                    }
+
+                    nodeSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
             }
 
-            return "";
+            // Return array of nodes that have the image
+            JSONArray jsonResult = new JSONArray(nodesWithImage.parallelStream().map(GossipNode::toJSON).toArray());
+            return jsonResult.toString();
 
         } else if(input.get("type").toString().equals("run_image")) {
             // TODO: Start image on all nodes that have this image
             // TODO: get back container info from nodes that we send this command to.
             String image = input.get("image").toString();
-            String nodes = input.get("nodes").toString();
+            String nodesText = input.get("nodes").toString();
 
-            // TODO: open tcp socket to each of the nodes in the JSONArray and send the run_image command to them
+            // TODO: Get IP Addresses from all nodes in nodesText
+            List<GossipNode> nodes = gossipManager.getNodes();
 
-            // TODO: add returned container information to JSONAray.
+            List<String> nodeContainers = new ArrayList<>();
+            JSONObject json = new JSONObject();
+            json.put("type", "receive_command");
+            json.put("command", "run_image");
+            json.put("image", image);
 
+            // Broadcast the has_image request to all nodes.
+            for(GossipNode node : nodes) {
+                try {
+                    // Open tcp socket to another node and send to it.
+                    Socket nodeSocket = new Socket(node.getAddr(), Constants.API_INTERNAL_PORT);
+
+                    // Send the json to that node.
+                    PrintWriter out = new PrintWriter(nodeSocket.getOutputStream(), true);
+                    BufferedReader in = new BufferedReader(new InputStreamReader(nodeSocket.getInputStream()));
+
+                    out.println(json.toString());
+
+                    // Add returned container information to JSONAray.
+                    String result = in.readLine();
+
+                    nodeContainers.add(result);
+
+                    nodeSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            // Return array of nodes that have the image
+            JSONArray jsonResult = new JSONArray(nodeContainers.toArray());
+            return jsonResult.toString();
         }
 
         return "unsubscribe";
