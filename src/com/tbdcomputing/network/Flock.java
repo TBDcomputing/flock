@@ -1,5 +1,6 @@
 package com.tbdcomputing.network;
 
+import com.tbdcomputing.network.api.APIServer;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryBroadcaster;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryListener;
 import com.tbdcomputing.network.discovery.NetworkDiscoveryReceiver;
@@ -82,6 +83,9 @@ public class Flock {
 
     private static BullyElectionManager election;
 
+    private static Thread apiServerThread;
+    private static APIServer apiServer;
+
     public static void main(String[] args) {
 
         Scanner cmdLine = new Scanner(System.in);
@@ -121,11 +125,19 @@ public class Flock {
                 if (gossipReceiver.getSocket() != null) {
                     gossipReceiver.getSocket().close();
                 }
+
+                apiServerThread.interrupt();
+
+                // close the socket so that interrupt will succeed
+                if(apiServer.getSocket() != null) {
+                    apiServer.getSocket().close();
+                }
                 try {
                     receiverThread.join();
                     broadcasterThread.join();
                     gossipSenderThread.join();
                     gossipReceiverThread.join();
+                    apiServerThread.join();
                     if (election != null) {
                         election.join();
                     }
@@ -245,6 +257,20 @@ public class Flock {
 
         election = new BullyElectionManager(manager);
         election.start();
+
+        apiServer = new APIServer(manager, election);
+
+        apiServerThread = new Thread() {
+            @Override
+            public void run() {
+                while (!isInterrupted()) {
+                    apiServer.run();
+                }
+                System.err.println("Exiting api server thread!");
+            }
+        };
+
+        apiServerThread.start();
     }
 
 }

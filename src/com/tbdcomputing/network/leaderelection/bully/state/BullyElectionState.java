@@ -6,13 +6,14 @@ import org.json.JSONObject;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Observable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Standard ElectionState class which Followers, Candidates, and Leaders extend.
  */
-public abstract class BullyElectionState {
+public abstract class BullyElectionState extends Observable {
     protected final Logger log = Logger.getLogger(BullyElectionState.class.getName());
     protected BullyElectionStateContext context;
 
@@ -80,6 +81,10 @@ public abstract class BullyElectionState {
             default:
                 return null;
         }
+    }
+
+    public BullyElectionStateContext getContext() {
+        return context;
     }
 
 }

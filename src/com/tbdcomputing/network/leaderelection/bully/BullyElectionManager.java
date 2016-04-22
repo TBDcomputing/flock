@@ -56,6 +56,10 @@ public class BullyElectionManager extends Thread {
         listener.setSocketTimeout(1);
     }
 
+    public BullyElectionState getElectionState() {
+        return state;
+    }
+
     /**
      * Closes the socket on system shutdown
      */

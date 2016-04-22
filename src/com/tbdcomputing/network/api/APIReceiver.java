@@ -24,7 +24,6 @@ public class APIReceiver {
         }
 
         listening = true;
-        this.run();
     }
 
     public void run() {

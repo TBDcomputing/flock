@@ -5,6 +5,7 @@ import com.tbdcomputing.network.gossip.GossipManager;
 import com.tbdcomputing.network.gossip.GossipNode;
 import com.tbdcomputing.network.gossip.GossipStatus;
 import com.tbdcomputing.network.leaderelection.ElectionManager;
+import com.tbdcomputing.network.leaderelection.bully.BullyElectionManager;
 import com.tbdcomputing.network.leaderelection.state.ElectionState;
 
 import org.json.JSONArray;
@@ -29,16 +30,18 @@ import java.util.Observer;
 public class APIServerThread extends Thread implements Observer {
     private Socket socket;
     private GossipManager gossipManager;
-    private ElectionManager electionManager;
+    private BullyElectionManager electionManager;
     private APIServer apiServer;
 
-    public APIServerThread(Socket accept, GossipManager gossipManager, ElectionManager electionManager, APIServer server) {
+    public APIServerThread(Socket accept, GossipManager gossipManager, BullyElectionManager electionManager, APIServer server) {
         super("APIServerThread");
         socket = accept;
         this.gossipManager = gossipManager;
         this.electionManager = electionManager;
         apiServer = server;
         gossipManager.addObserver(this);
+
+        // TODO: Fix in election manager
         electionManager.getElectionState().addObserver(this);
 
     }
@@ -69,7 +72,6 @@ public class APIServerThread extends Thread implements Observer {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            apiServer.removeConnection(this);
             gossipManager.deleteObserver(this);
             electionManager.getElectionState().deleteObserver(this);
         }

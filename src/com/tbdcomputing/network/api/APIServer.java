@@ -1,8 +1,11 @@
 package com.tbdcomputing.network.api;
 
+import com.sun.corba.se.spi.activation.Server;
+import com.sun.tools.javac.file.JavacFileManager;
 import com.tbdcomputing.network.Constants;
 import com.tbdcomputing.network.gossip.GossipManager;
 import com.tbdcomputing.network.leaderelection.ElectionManager;
+import com.tbdcomputing.network.leaderelection.bully.BullyElectionManager;
 
 
 import java.io.IOException;
@@ -19,20 +22,28 @@ import java.util.List;
 public class APIServer {
     private ServerSocket serverSocket;
     private GossipManager gossipManager;
-    private ElectionManager electionManager;
+    private BullyElectionManager electionManager;
     private APIReceiver receiver;
-    private List<APIServerThread> threads;
+    private Thread receiverThread;
     private boolean listening;
 
-    public APIServer(GossipManager gossipManager, ElectionManager electionManager) {
+    public APIServer(GossipManager gossipManager, BullyElectionManager electionManager) {
         this.gossipManager = gossipManager;
         this.electionManager = electionManager;
 
         receiver = new APIReceiver();
-        receiver.run();
+        receiverThread = new Thread() {
+            @Override
+            public void run() {
+                while (!isInterrupted()) {
+                    receiver.run();
+                }
+                System.err.println("Exiting receiver thread!");
+            }
+        };
+        receiverThread.start();
 
         listening = true;
-        threads = new LinkedList<>();
 
         try {
             serverSocket = new ServerSocket(Constants.API_PORT);
@@ -48,7 +59,6 @@ public class APIServer {
             try {
                 APIServerThread connection = new APIServerThread(serverSocket.accept(), gossipManager, electionManager, this);
 
-                threads.add(connection);
                 connection.start();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -57,9 +67,7 @@ public class APIServer {
         }
     }
 
-    public void removeConnection(APIServerThread apiServerThread) {
-        threads.remove(apiServerThread);
+    public ServerSocket getSocket() {
+        return serverSocket;
     }
-
-
 }
