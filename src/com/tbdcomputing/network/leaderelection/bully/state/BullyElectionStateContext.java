@@ -2,6 +2,7 @@ package com.tbdcomputing.network.leaderelection.bully.state;
 
 import com.tbdcomputing.network.gossip.GossipManager;
 import com.tbdcomputing.network.leaderelection.ElectionSender;
+import com.tbdcomputing.network.utils.ExperimentUtils;
 
 import java.net.InetAddress;
 
@@ -21,9 +22,12 @@ public class BullyElectionStateContext {
         this.myAddr = manager.getMe().getAddr();
     }
 
-    public String getAlpha() {
-        //TODO: Temporary fake placeholder
-        return manager.getMe().getAddr().getHostAddress();
+    public double getAlpha() {
+        if(ExperimentUtils.PROXY_MODE){ //use IP instead of alpha value for experimental elections
+            return manager.getMe().getAddr().getHostAddress().hashCode();
+        }else{
+            return manager.getMe().getAlphaValue();
+        }
     }
 
     public GossipManager getManager() {

@@ -2,10 +2,15 @@ package com.tbdcomputing.network.leaderelection.bully.state;
 
 import com.tbdcomputing.network.leaderelection.bully.message.BullyElectionMessageType;
 import com.tbdcomputing.network.leaderelection.bully.message.BullyElectionMessageUtils;
+import com.tbdcomputing.network.utils.ExperimentUtils;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,6 +77,17 @@ public abstract class BullyElectionState {
         log.log(Level.INFO, String.format("Transitioning into %s.", type.name()));
         switch (type) {
             case LEADER:
+                if(!ExperimentUtils.electionStopTimeIsSet){
+                    ExperimentUtils.electionStopTime = System.currentTimeMillis();
+                    ExperimentUtils.electionStopTimeIsSet = true;
+
+                    try {
+                        Files.write(Paths.get(ExperimentUtils.ELECTION_LOG_FP ), ("\nleader elected at: " + ExperimentUtils.electionStopTime).getBytes(), StandardOpenOption.APPEND);
+                    }catch (IOException e) {
+                        //exception handling left as an exercise for the reader
+                    }
+                    System.out.println("leader elected at: " + ExperimentUtils.electionStopTime);
+                }
                 return new BullyElectionLeader(this.context);
             case CANDIDATE:
                 return new BullyElectionCandidate(this.context);

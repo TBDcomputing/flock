@@ -58,18 +58,6 @@ public class BullyElectionLeader extends BullyElectionState {
         JSONObject msg = BullyElectionMessageUtils.makeMessage(
                 context.getAlpha(), context.getMyAddr(), BullyElectionMessageType.SITDOWN);
         context.getSender().broadcast(msg, context.getManager().getNodes());
-
-        if(!ExperimentUtils.electionStopTimeIsSet){
-            ExperimentUtils.electionStopTime = System.currentTimeMillis();
-            ExperimentUtils.electionStopTimeIsSet = true;
-
-            try {
-                Files.write(Paths.get(ExperimentUtils.ELECTION_LOG_FP ), ("\nleader elected at: " + ExperimentUtils.electionStopTime).getBytes(), StandardOpenOption.APPEND);
-            }catch (IOException e) {
-                //exception handling left as an exercise for the reader
-            }
-            System.out.println("leader elected at: " + ExperimentUtils.electionStopTime);
-        }
     }
 
     /**

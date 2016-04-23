@@ -4,8 +4,13 @@ import com.tbdcomputing.network.Constants;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.*;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.prefs.Preferences;
 
 
 /**
@@ -20,6 +25,7 @@ public class GossipNode {
     private long heartbeat;
     private long generationTime;
     private GossipStatus status;
+    private Alpha alpha;
 
     /**
      * This constructor should be used to populate the local GossipNode for this node. Otherwise, populate it with
@@ -31,6 +37,7 @@ public class GossipNode {
         this.heartbeat = System.currentTimeMillis();
         this.generationTime = this.heartbeat;
         this.status = GossipStatus.NORMAL; // TODO: change to starting and update lifecycle of GossipNode to update status.
+        this.alpha = new Alpha();
     }
 
 //	public GossipNode(InetAddress addr) {
@@ -127,5 +134,134 @@ public class GossipNode {
 
     public synchronized void setStatus(GossipStatus status) {
         this.status = status;
+    }
+
+    public synchronized double getAlphaValue() { return this.alpha.getAlphaValue(); }
+
+    private class Alpha implements Comparable {
+
+        static final int NUM_TRIALS = 5;
+
+        double alphaValue;
+        double latencyAvg;
+        double loadAvg;
+        double uptimeAvg;
+        double throughputAvg;
+
+        public Alpha(){
+
+            latencyAvg = getLatencyAvg();
+            loadAvg = getLoadAvg();
+            uptimeAvg = getUptimeAvg();
+            throughputAvg = getThroughputAvg();
+
+            alphaValue = throughputAvg + uptimeAvg + (-1*loadAvg) + (-1*latencyAvg);
+
+            //TODO all GossipNodes should pass around the Alpha object to each other so that they can make a reliable normalization
+            //TODO fix current constructor to use IP if weights can't be obtained
+            //TODO add in constructor that takes in weight preferences
+            //TODO election needs to be modified to take into account which preferences the user decided they wanted to elect on
+            //TODO election could be modified to stop election messages from being sent to already determined followers
+            //TODO constructor creates Alpha object,
+            //TODO put this class in gossipnode as a private class
+            //TODO code refreshAlpha method
+            //TODO add requestlimitexceeded retry to current ec2 client
+        }
+
+        public Alpha(JSONObject configuration){
+            //TODO read in a configuration somewhere that provides weights for the alpha factors
+        }
+
+        public void refreshAlpha(){
+            latencyAvg = getLatencyAvg();
+            loadAvg = getLoadAvg();
+            uptimeAvg = getUptimeAvg();
+            throughputAvg = getThroughputAvg();
+
+            alphaValue = throughputAvg + uptimeAvg + (-1*loadAvg) + (-1*latencyAvg);
+        }
+
+        /**
+         * @return The average latency to stackoverflow.com for this node
+         */
+        public double getLatencyAvg(){
+
+            String[] loadAvgCmd = new String[]{"bash","-c","ping -c 4 www.stackoverflow.com | tail -1| awk '{print $4}' | cut -d '/' -f 2"};
+            try {
+                Process p = Runtime.getRuntime().exec(loadAvgCmd);
+
+                BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                String[] output = in.readLine().split("\\s+");
+                for(String i : output){
+                    System.out.println(i);
+                }
+
+                in.close();
+
+                return Double.parseDouble(output[0]);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return Double.MAX_VALUE;
+        }
+
+        /**
+         * @return The average load over the past 15 minutes
+         */
+        public double getLoadAvg() {
+            String[] loadAvgCmd = new String[]{"bash","-c","cat /proc/loadavg"};
+            try {
+                Process p = Runtime.getRuntime().exec(loadAvgCmd);
+
+                BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                String[] output = in.readLine().split("\\s+");
+
+                in.close();
+
+                return Double.parseDouble(output[2]);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return Double.MAX_VALUE;
+        }
+
+        public double getThroughputAvg(){
+            //computational throughput: run a task that measures it, the task should do some multithreaded assignment
+            //the task should have a start time and an end time
+            //the task should do some multithreaded work over the period of time endTime - startTime
+            //The multithreaded work should use 10 threads to do some heavy task
+            //The task should ideally not require extra memory like a merge sort
+            return 0;
+        }
+
+        public double getUptimeAvg(){
+            //Reads from the previous uptimes of this node
+            //must store the uptime before quitting the program
+            return 0;
+        }
+
+        public double getAlphaValue(){
+            return alphaValue;
+        }
+
+        @Override
+        public int compareTo(Object o) {
+            Alpha that = (Alpha) o;
+            if (this.alphaValue > that.alphaValue) {
+                return 1;
+            } else if (this.alphaValue < that.alphaValue) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
+
+
+        @Override
+        public String toString() {
+            return String.valueOf(this.alphaValue);
+        }
     }
 }

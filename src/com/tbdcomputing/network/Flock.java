@@ -96,6 +96,17 @@ public class Flock {
                     ExperimentUtils.PROXY_MODE = true;
 
                     ExperimentUtils.refreshClusterAddressList();
+
+                    try{
+                        File file = new File(ExperimentUtils.ELECTION_LOG_FP);
+
+                        if (!file.exists()) {
+                            file.createNewFile();
+                        }
+                    }
+                    catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
                 run();
 
