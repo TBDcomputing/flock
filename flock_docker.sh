@@ -44,6 +44,7 @@ if [[ $1 = "vmports" ]]; then
 	if [ "$(uname)" == "Darwin" ]; then
 	    # Do something under Mac OS X platform
 	    # mac only
+	    vm_name=$(docker-machine active)
 	    VBoxManage showvminfo $vm_name --machinereadable | awk -F '[",]' '/^Forwarding/ { printf ("Rule %s host port %d forwards to guest port %d\n", $2, $5, $7); }'
 		# stop mac only
 	elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
@@ -60,7 +61,17 @@ if [[ $1 = "start" ]]; then
 		exit
 	fi
 	# pass in docker image as arg
-	docker_image=$2
+	OIFS=$IFS
+	IFS=':' read -a myarray <<< "$2"
+	IFS=$OIFS
+
+	docker_image=${myarray[0]}
+	docker_image_version=${myarray[1]}
+
+	if [[ $docker_image_version = "" ]]; then
+		docker_image_version="latest"
+	fi
+
 	ssh_port=$3
 
 	# cleans up any old docker images, added because I accumulated so many during testing
@@ -70,9 +81,9 @@ if [[ $1 = "start" ]]; then
 	# this is the setup SSH server in the container method
 	rm -f Dockerfile
 	cp Dockerfile.example Dockerfile
-	sed -i '' 's/dockerimage/'"$docker_image"'/g' Dockerfile
-	docker build -t "ssh_${docker_image}" .
-	docker_id=$(docker run -d --name ssh_${docker_image}_${ssh_port} -p $ssh_port:22 ssh_${docker_image})
+	sed -i '' 's/dockerimage/'"$docker_image"':'"$docker_image_version"'/g' Dockerfile
+	docker build -t "ssh_${docker_image}:${docker_image_version}" .
+	docker_id=$(docker run -d --name ${ssh_port}_ssh_${docker_image} -p $ssh_port:22 ssh_${docker_image}:${docker_image_version})
 	# docker attach "$docker_id"
 	# su; ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''; ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key -N ''; ssh-keygen -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -N ''; exit
 	yes "exit" | docker exec -i "$docker_id" /bin/bash -c "su; ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''; ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key -N ''; ssh-keygen -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -N ''; exit" > /dev/null
@@ -101,12 +112,21 @@ if [[ $1 = "stop" ]]; then
 		exit
 	fi
 	# pass in docker image as arg
-	docker_image=$2
+	OIFS=$IFS
+	IFS=':' read -a myarray <<< "$2"
+	IFS=$OIFS
+
+	docker_image=${myarray[0]}
+	docker_image_version=${myarray[1]}
+	if [[ $docker_image_version = "" ]]; then
+		docker_image_version="latest"
+	fi
+
 	ssh_port=$3
 
 	# cleans up any old docker images, added because I accumulated so many during testing
-	docker stop "ssh_${docker_image}_${ssh_port}"
-	docker rm "ssh_${docker_image}_${ssh_port}"
+	docker stop "${ssh_port}_ssh_${docker_image}"
+	docker rm "${ssh_port}_ssh_${docker_image}"
 
 	echo -e "Your container has been stopped and removed."
 	exit
