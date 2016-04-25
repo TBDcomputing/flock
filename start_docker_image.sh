@@ -1,12 +1,16 @@
 #! /bin/bash
 
-if [[ $# -eq 0 ]]; then
+print_help() {
 	script_name="$(basename "$0")"
 	echo "Usage:"
 	echo -e "\t$script_name help\n\t\t to see this prompt."
 	echo -e "\t$script_name open [PORT NUMBER]\n\t\t for opening ports for the VM (Mac only)"
 	echo -e "\t$script_name vmports\n\t\t for listing the forwarding rules for the VM (Mac only)"
 	echo -e "\t$script_name start [DOCKER_IMAGE] [PORT NUMBER]\n\t\t to start a new docker image with SSH available at the given port"
+}
+
+if [[ $# -eq 0 ]] || [[ $1 = "help" ]]; then
+	print_help
 	exit
 fi
 
@@ -66,7 +70,7 @@ if [[ $1 = "start" ]]; then
 	rm -f Dockerfile
 	cp Dockerfile.example Dockerfile
 	sed -i '' 's/dockerimage/'"$docker_image"'/g' Dockerfile
-	docker build -t "ssh_${docker_image}" . > /dev/null
+	docker build -t "ssh_${docker_image}" .
 	docker_id=$(docker run -d -p $ssh_port:22 ssh_${docker_image})
 	# docker attach "$docker_id"
 	# su; ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''; ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key -N ''; ssh-keygen -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -N ''; exit
@@ -89,4 +93,5 @@ if [[ $1 = "start" ]]; then
 	exit
 fi
 
+print_help
 exit

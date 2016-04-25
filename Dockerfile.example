@@ -1,7 +1,10 @@
 # https://docs.docker.com/engine/examples/running_ssh_service/
 FROM dockerimage
 
-RUN yum install -y openssh-server
+# just run both -- only one will succeed
+RUN yum install -y openssh-server; exit 0
+RUN apt-get install -y openssh-server; exit 0
+
 RUN mkdir /var/run/sshd
 RUN echo 'root:screencast' | chpasswd
 RUN sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config
