@@ -7,6 +7,7 @@ print_help() {
 	echo -e "\t$script_name open [PORT NUMBER]\n\t\t for opening ports for the VM (Mac only)"
 	echo -e "\t$script_name vmports\n\t\t for listing the forwarding rules for the VM (Mac only)"
 	echo -e "\t$script_name start [DOCKER_IMAGE] [PORT NUMBER]\n\t\t to start a new docker image with SSH available at the given port"
+	echo -e "\t$script_name stop [DOCKER_IMAGE] [PORT NUMBER]\n\t\t to stop the container with the docker image/port combination"
 }
 
 if [[ $# -eq 0 ]] || [[ $1 = "help" ]]; then
@@ -63,15 +64,15 @@ if [[ $1 = "start" ]]; then
 	ssh_port=$3
 
 	# cleans up any old docker images, added because I accumulated so many during testing
-	docker stop $(docker ps -a -q) > /dev/null 2>/dev/null
-	docker rm $(docker ps -a -q) > /dev/null 2>/dev/null
+	# docker stop $(docker ps -a -q) > /dev/null 2>/dev/null
+	# docker rm $(docker ps -a -q) > /dev/null 2>/dev/null
 
 	# this is the setup SSH server in the container method
 	rm -f Dockerfile
 	cp Dockerfile.example Dockerfile
 	sed -i '' 's/dockerimage/'"$docker_image"'/g' Dockerfile
 	docker build -t "ssh_${docker_image}" .
-	docker_id=$(docker run -d -p $ssh_port:22 ssh_${docker_image})
+	docker_id=$(docker run -d --name ssh_${docker_image}_${ssh_port} -p $ssh_port:22 ssh_${docker_image})
 	# docker attach "$docker_id"
 	# su; ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''; ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key -N ''; ssh-keygen -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -N ''; exit
 	yes "exit" | docker exec -i "$docker_id" /bin/bash -c "su; ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''; ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key -N ''; ssh-keygen -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -N ''; exit" > /dev/null
@@ -90,6 +91,24 @@ if [[ $1 = "start" ]]; then
 	ssh-keygen -R "[localhost]:$ssh_port" > /dev/null 2>/dev/null
 
 	echo -e "You can now SSH into your container using:\n ssh -p $ssh_port root@localhost (password is screencast)"
+	exit
+fi
+
+# stop docker image
+if [[ $1 = "stop" ]]; then
+	if [[ $# -ne 3 ]]; then
+		echo "Please specify a Docker image and port to stop a container."
+		exit
+	fi
+	# pass in docker image as arg
+	docker_image=$2
+	ssh_port=$3
+
+	# cleans up any old docker images, added because I accumulated so many during testing
+	docker stop "ssh_${docker_image}_${ssh_port}"
+	docker rm "ssh_${docker_image}_${ssh_port}"
+
+	echo -e "Your container has been stopped and removed."
 	exit
 fi
 
