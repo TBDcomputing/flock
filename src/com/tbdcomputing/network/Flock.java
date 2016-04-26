@@ -10,10 +10,7 @@ import com.tbdcomputing.network.utils.ExperimentUtils;
 import com.tbdcomputing.network.leaderelection.bully.BullyElectionManager;
 import org.json.JSONObject;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.SocketException;
 import java.util.List;
@@ -30,6 +27,7 @@ import java.util.stream.Collectors;
 public class Flock {
 
     private static boolean running = false;
+    public static long startTime;
 
     private static Thread gossipReceiverThread;
     private static Thread gossipSenderThread;
@@ -83,6 +81,7 @@ public class Flock {
     private static BullyElectionManager election;
 
     public static void main(String[] args) {
+        attachShutDownHook();
 
         Scanner cmdLine = new Scanner(System.in);
         while (true) {
@@ -91,6 +90,7 @@ public class Flock {
                 cmd[i] = cmd[i].toLowerCase();
             }
             if (cmd[0].equals("start") && !running) {
+                startTime = System.currentTimeMillis();
                 running = true;
                 if(cmd.length == 2 && cmd[1].equals("proxy")){
                     ExperimentUtils.PROXY_MODE = true;
@@ -98,7 +98,7 @@ public class Flock {
                     ExperimentUtils.refreshClusterAddressList();
 
                     try{
-                        File file = new File(ExperimentUtils.ELECTION_LOG_FP);
+                        File file = new File(ExperimentUtils.ELECTION_LOG);
 
                         if (!file.exists()) {
                             file.createNewFile();
@@ -169,7 +169,7 @@ public class Flock {
         ExperimentUtils.electionStartTime = System.currentTimeMillis();
 
         try{
-            File file = new File(ExperimentUtils.ELECTION_LOG_FP);
+            File file = new File(ExperimentUtils.ELECTION_LOG);
 
             if (!file.exists()) {
                 file.createNewFile();
@@ -191,6 +191,42 @@ public class Flock {
         }
 
         election.startElection();
+    }
+
+    public static void attachShutDownHook(){
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                try{
+                    File file = new File(Constants.ALPHA_UPTIME_LOG);
+                    long uptime = System.currentTimeMillis() - Flock.startTime;
+
+                    if (!file.exists()) {
+                        file.createNewFile();
+
+                        FileWriter fw = new FileWriter(file.getAbsoluteFile());
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        bw.write(""+uptime); //uptime
+                        bw.close();
+                    }else{
+                        FileReader fileReader = new FileReader(Constants.ALPHA_UPTIME_LOG);
+                        BufferedReader bufferedReader = new BufferedReader(fileReader);
+                        long avgUptime = Long.parseLong(bufferedReader.readLine());
+                        bufferedReader.close();
+
+                        avgUptime = Math.round((avgUptime+uptime)/2);
+
+                        FileWriter fw = new FileWriter(file.getAbsoluteFile());
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        bw.write(""+avgUptime); //avgUptime
+                        bw.close();
+                    }
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     private static void run() {

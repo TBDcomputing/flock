@@ -1,12 +1,11 @@
 package com.tbdcomputing.network.gossip;
 
 import com.tbdcomputing.network.Constants;
+import com.tbdcomputing.network.Flock;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Random;
@@ -192,9 +191,6 @@ public class GossipNode {
 
                 BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
                 String[] output = in.readLine().split("\\s+");
-                for(String i : output){
-                    System.out.println(i);
-                }
 
                 in.close();
 
@@ -237,8 +233,22 @@ public class GossipNode {
         }
 
         public double getUptimeAvg(){
-            //Reads from the previous uptimes of this node
-            //must store the uptime before quitting the program
+            try{
+                File file = new File(Constants.ALPHA_UPTIME_LOG);
+
+                if (!file.exists()) {
+                    return System.currentTimeMillis() - Flock.startTime;
+                }else{
+                    FileReader fileReader = new FileReader(Constants.ALPHA_UPTIME_LOG);
+                    BufferedReader bufferedReader = new BufferedReader(fileReader);
+                    long avgUptime = Long.parseLong(bufferedReader.readLine());
+                    bufferedReader.close();
+                    return avgUptime;
+                }
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
             return 0;
         }
 

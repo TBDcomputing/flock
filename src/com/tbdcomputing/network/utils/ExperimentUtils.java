@@ -20,7 +20,7 @@ public class ExperimentUtils {
     public static long electionStartTime;
     public static long electionStopTime;
     public static boolean electionStopTimeIsSet = false;
-    public static final String ELECTION_LOG_FP = "/home/ubuntu/election.txt";
+    public static final String ELECTION_LOG = "/home/ubuntu/election.txt";
 
     /**
      * Reads in the proxy list of IP addresses for circumventing gossip and network discovery

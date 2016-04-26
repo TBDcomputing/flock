@@ -98,7 +98,7 @@ public class ElectionLeader extends ElectionState {
             ExperimentUtils.electionStopTimeIsSet = true;
 
             try {
-                Files.write(Paths.get(ExperimentUtils.ELECTION_LOG_FP), ("\nleader elected at: " + ExperimentUtils.electionStopTime).getBytes(), StandardOpenOption.APPEND);
+                Files.write(Paths.get(ExperimentUtils.ELECTION_LOG), ("\nleader elected at: " + ExperimentUtils.electionStopTime).getBytes(), StandardOpenOption.APPEND);
             } catch (IOException e) {
                 //exception handling left as an exercise for the reader
             }
