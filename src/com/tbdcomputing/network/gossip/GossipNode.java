@@ -162,13 +162,13 @@ public class GossipNode {
             //TODO election needs to be modified to take into account which preferences the user decided they wanted to elect on
             //TODO election could be modified to stop election messages from being sent to already determined followers
             //TODO constructor creates Alpha object,
-            //TODO put this class in gossipnode as a private class
-            //TODO code refreshAlpha method
-            //TODO add requestlimitexceeded retry to current ec2 client
         }
 
         public Alpha(JSONObject configuration){
-            //TODO read in a configuration somewhere that provides weights for the alpha factors
+            //TODO read in a configuration somewhere that provides weights for the alpha factors\
+
+            //TODO FIX THE UPTIME DIFFERENCE BUG
+            //TODO ADD WHOEVER WON THE ELECTION TO THE CSV AND MAKE SURE YOU'RE TAKING THE LARGEST TIME
         }
 
         public void refreshAlpha(){
