@@ -77,6 +77,8 @@ public class APIReceiverThread extends Thread {
 
                         if(containsImage) {
                             return "true";
+                        } else {
+                            return "false";
                         }
                     }
                 } catch (IOException e) {
