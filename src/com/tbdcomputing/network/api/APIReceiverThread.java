@@ -2,9 +2,12 @@ package com.tbdcomputing.network.api;
 
 import com.sun.tools.doclets.internal.toolkit.util.DocFinder;
 import com.sun.tools.javac.parser.Scanner;
+import com.tbdcomputing.network.Constants;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.Socket;
 
 /**
@@ -78,7 +81,7 @@ public class APIReceiverThread extends Thread {
                         System.out.println(line);
                     }
                     JSONObject json = new JSONObject();
-                    json.put("ip", socket.getInetAddress().getHostAddress().toString());
+                    json.put("ip", Constants.findLocalAddress().toString());
                     json.put("port", "8895");
                     return json.toString();
                 } catch (IOException e) {
