@@ -30,9 +30,8 @@ public abstract class BullyElectionState {
 
     public abstract BullyElectionState handleElection(JSONObject message);
 
-    public BullyElectionState handleSitdown(JSONObject message) {
-        return transition(BullyElectionStateType.FOLLOWER);
-    }
+
+    public abstract BullyElectionState handleSitdown(JSONObject message);
 
     /**
      * @return timeout in milliseconds (0 implies no timeout)

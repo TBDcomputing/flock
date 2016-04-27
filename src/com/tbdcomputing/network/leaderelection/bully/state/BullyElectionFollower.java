@@ -37,6 +37,17 @@ public class BullyElectionFollower extends BullyElectionState {
         }
     }
 
+    @Override
+    public BullyElectionState handleSitdown(JSONObject message) {
+        String alpha = message.getString("alpha");
+        if (alpha.compareTo(this.context.getAlpha()) <= 0) {
+            sendSitdownMessage(message.getString("sender"));
+            return transition(BullyElectionStateType.CANDIDATE);
+        } else {
+            return this;
+        }
+    }
+
     /**
      * Randomized time for the socket to wait for a heartbeat from the leader
      *

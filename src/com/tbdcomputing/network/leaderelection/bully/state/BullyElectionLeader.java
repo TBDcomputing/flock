@@ -52,16 +52,16 @@ public class BullyElectionLeader extends BullyElectionState {
     }
 
 
-//    @Override
-//    public BullyElectionState handleSitdown(JSONObject message) {
-//        String alpha = message.getString("alpha");
-//        if (alpha.compareTo(this.context.getAlpha()) <= 0) {
-//            sendSitdownMessage(message.getString("sender"));
-//            return this;
-//        } else {
-//            return transition(BullyElectionStateType.FOLLOWER);
-//        }
-//    }
+    @Override
+    public BullyElectionState handleSitdown(JSONObject message) {
+        String alpha = message.getString("alpha");
+        if (alpha.compareTo(this.context.getAlpha()) <= 0) {
+            sendSitdownMessage(message.getString("sender"));
+            return this;
+        } else {
+            return transition(BullyElectionStateType.FOLLOWER);
+        }
+    }
 
     /**
      * Broadcasts a suppression message to all nodes in the cluster through heartbeats
