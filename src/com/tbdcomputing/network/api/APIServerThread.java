@@ -104,8 +104,7 @@ public class APIServerThread extends Thread implements Observer {
 
             return json.toString();
         } else if(input.get("type").toString().equals("start_election")) {
-            // TODO: run election
-
+            electionManager.startElection();
             return "";
         } else if(input.get("type").toString().equals("has_image")) {
             // Parse image and send it to each node.
