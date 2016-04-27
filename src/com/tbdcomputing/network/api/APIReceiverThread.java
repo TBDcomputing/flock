@@ -87,7 +87,19 @@ public class APIReceiverThread extends Thread {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            } else if (input.getString("command").equals("stop_image")) {
+                Runtime rt = Runtime.getRuntime();
+
+                String[] commands = {"./flock_docker.sh", "stop", image};
+
+                try {
+                    rt.exec(commands);
+                    return "done";
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }            
             }
+
         }
         return "";
     }

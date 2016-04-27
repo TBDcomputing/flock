@@ -200,6 +200,37 @@ public class APIServerThread extends Thread implements Observer {
             // Return array of nodes that have the image
             JSONArray jsonResult = new JSONArray(nodeContainers.toArray());
             return jsonResult.toString();
+        } else if(input.getString("type").equals("stop_image")) {
+            // Parse image and send it to each node.
+            String image = input.get("image").toString();
+            List<GossipNode> nodes = new ArrayList<>(gossipManager.getNodes());
+            nodes.add(gossipManager.getMe());
+
+            JSONObject json = new JSONObject();
+            json.put("type", "receive_command");
+            json.put("command", "stop_image");
+            json.put("image", image);
+
+            // Broadcast the stop_image request to all nodes.
+            for(GossipNode node : nodes) {
+                try {
+                    // Open tcp socket to another node and send to it.
+                    Socket nodeSocket = new Socket(node.getAddr(), Constants.API_INTERNAL_PORT);
+
+                    // Send the json to that node.
+                    PrintWriter out = new PrintWriter(nodeSocket.getOutputStream(), true);
+                    BufferedReader in = new BufferedReader(new InputStreamReader(nodeSocket.getInputStream()));
+
+                    out.println(json.toString());
+
+                    nodeSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+            return "done";
+
         }
 
         return "unsubscribe";
