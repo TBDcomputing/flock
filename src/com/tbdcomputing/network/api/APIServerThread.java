@@ -155,13 +155,15 @@ public class APIServerThread extends Thread implements Observer {
             // TODO: Start image on all nodes that have this image
             // TODO: get back container info from nodes that we send this command to.
             String image = input.get("image").toString();
-            JSONArray nodesText = input.getJSONArray("nodes");
-
-            // TODO: Get IP Addresses from all nodes in nodesText
-            List<GossipNode> nodes = new ArrayList<>();
-            for(int i = 0; i < nodesText.length(); i++) {
-                nodes.add(new GossipNode(nodesText.getJSONObject(i)));
-            }
+            List<GossipNode> nodes = gossipManager.getNodes();
+            nodes.add(gossipManager.getMe());
+//            JSONArray nodesText = input.getJSONArray("nodes");
+//
+//            // TODO: Get IP Addresses from all nodes in nodesText
+//            List<GossipNode> nodes = new ArrayList<>();
+//            for(int i = 0; i < nodesText.length(); i++) {
+//                nodes.add(new GossipNode(nodesText.getJSONObject(i)));
+//            }
 
             List<String> nodeContainers = new ArrayList<>();
             JSONObject json = new JSONObject();
@@ -184,7 +186,9 @@ public class APIServerThread extends Thread implements Observer {
                     // Add returned container information to JSONAray.
                     String result = in.readLine();
 
-                    nodeContainers.add(result);
+                    if (!"".equals(result)) {
+                        nodeContainers.add(result);
+                    }
 
                     nodeSocket.close();
                 } catch (IOException e) {

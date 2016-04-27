@@ -50,49 +50,19 @@ public class APIReceiverThread extends Thread {
         if (input.get("type").toString().equals("receive_command")) {
             String image = input.get("image").toString();
 
-            Runtime rt = Runtime.getRuntime();
-
             if (input.get("command").toString().equals("has_image")) {
-                // check if this image is present by checking output of "docker images"
-                String[] commands = {"docker", "images"};
-
-                try {
-                    Process proc = rt.exec(commands);
-
-                    BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-
-                    String line = null;
-
-                    String[] imageForm = image.split(":");
-
-                    boolean containsImage = false;
-                    while ((line = br.readLine()) != null) {
-                        String[] splitLine = line.split("\\s+");
-
-                        if (splitLine.length < imageForm.length) continue;
-
-                        containsImage = true;
-
-                        // Handle "centos:7" by splitting on colon and checking if it contains both name and tag
-                        for (int i = 0; i < imageForm.length; i++) {
-                            if (!splitLine[i].equals(imageForm[i])) {
-                                containsImage = false;
-                            }
-                        }
-
-                        if (containsImage) break;
-                    }
-
-                    if (containsImage) {
-                        return "true";
-                    } else {
-                        return "false";
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (hasImage(image)) {
+                    return "true";
+                } else {
+                    return "false";
+                }
+            } else if (input.get("command").toString().equals("run_image")) {
+                if (!hasImage(image)) {
+                    return "";
                 }
 
-            } else if (input.get("command").toString().equals("run_image")) {
+                Runtime rt = Runtime.getRuntime();
+
                 String[] commands = {"./flock_docker.sh", "start", image, "8895"};
 
                 try {
@@ -117,6 +87,50 @@ public class APIReceiverThread extends Thread {
             }
         }
         return "";
+    }
+
+    public boolean hasImage(String image) {
+        // check if this image is present by checking output of "docker images"
+        String[] commands = {"docker", "images"};
+        Runtime rt = Runtime.getRuntime();
+
+        try {
+            Process proc = rt.exec(commands);
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+
+            String line = null;
+
+            String[] imageForm = image.split(":");
+
+            boolean containsImage = false;
+            while ((line = br.readLine()) != null) {
+                String[] splitLine = line.split("\\s+");
+
+                if (splitLine.length < imageForm.length) continue;
+
+                containsImage = true;
+
+                // Handle "centos:7" by splitting on colon and checking if it contains both name and tag
+                for (int i = 0; i < imageForm.length; i++) {
+                    if (!splitLine[i].equals(imageForm[i])) {
+                        containsImage = false;
+                    }
+                }
+
+                if (containsImage) break;
+            }
+
+            if (containsImage) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
 //    public static void main(String[] args) {

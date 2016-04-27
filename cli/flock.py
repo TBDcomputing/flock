@@ -47,6 +47,8 @@ def listener():
 
 def process_message(jsonmsg):
     msg = json.loads(jsonmsg)
+    print msg
+    # TODO: handle arrays like from nodelist
     for k, v in msg.items():
         print k, v
 
@@ -57,7 +59,8 @@ def send_message(mtype, arg=None):
         msg["image"] = arg
 
     jsonmsg = json.dumps(msg)
-    sock.sendall(jsonmsg)
+    # added new line since it uses readLine() in Java
+    sock.sendall(jsonmsg + '\n')
 
 
 class CLI(cmd.Cmd):
