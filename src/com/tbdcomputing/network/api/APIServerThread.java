@@ -110,7 +110,7 @@ public class APIServerThread extends Thread implements Observer {
         } else if(input.get("type").toString().equals("has_image")) {
             // Parse image and send it to each node.
             String image = input.get("image").toString();
-            List<GossipNode> nodes = gossipManager.getNodes();
+            List<GossipNode> nodes = new ArrayList<>(gossipManager.getNodes());
             nodes.add(gossipManager.getMe());
 
             List<GossipNode> nodesWithImage = new ArrayList<>();
@@ -155,7 +155,7 @@ public class APIServerThread extends Thread implements Observer {
             // TODO: Start image on all nodes that have this image
             // TODO: get back container info from nodes that we send this command to.
             String image = input.get("image").toString();
-            List<GossipNode> nodes = gossipManager.getNodes();
+            List<GossipNode> nodes = new ArrayList<>(gossipManager.getNodes());
             nodes.add(gossipManager.getMe());
 //            JSONArray nodesText = input.getJSONArray("nodes");
 //
