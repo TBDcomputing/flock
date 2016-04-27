@@ -94,7 +94,7 @@ public class APIReceiverThread extends Thread {
 
     public boolean hasImage(String image) {
         // check if this image is present by checking output of "docker images"
-        String[] commands = {"docker", "images"};
+        String[] commands = {"./flock_docker.sh", "images"};
         Runtime rt = Runtime.getRuntime();
 
         try {

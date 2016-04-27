@@ -171,7 +171,7 @@ public class APIServerThread extends Thread implements Observer {
             json.put("command", "run_image");
             json.put("image", image);
 
-            // Broadcast the has_image request to all nodes.
+            // Broadcast the run_image request to all nodes.
             for(GossipNode node : nodes) {
                 try {
                     // Open tcp socket to another node and send to it.
