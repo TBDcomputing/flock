@@ -1,6 +1,7 @@
 package com.tbdcomputing.network.api;
 
 import com.sun.tools.doclets.internal.toolkit.util.DocFinder;
+import com.sun.tools.javac.parser.Scanner;
 import org.json.JSONObject;
 
 import java.io.*;
@@ -51,7 +52,7 @@ public class APIReceiverThread extends Thread {
 
             Runtime rt = Runtime.getRuntime();
 
-            if(input.get("command").toString().equals("has_image")) {
+            if (input.get("command").toString().equals("has_image")) {
                 // check if this image is present by checking output of "docker images"
                 String[] commands = {"docker", "images"};
 
@@ -62,30 +63,36 @@ public class APIReceiverThread extends Thread {
 
                     String line = null;
 
-                    String imageForm[] = image.split(":");
+                    String[] imageForm = image.split(":");
 
-                    boolean containsImage;
-                    while( (line = br.readLine()) != null) {
+                    boolean containsImage = false;
+                    while ((line = br.readLine()) != null) {
+                        String[] splitLine = line.split("\\s+");
+
+                        if (splitLine.length < imageForm.length) continue;
+
                         containsImage = true;
 
                         // Handle "centos:7" by splitting on colon and checking if it contains both name and tag
-                        for(int i = 0; i < imageForm.length; i++) {
-                            if (!line.contains(imageForm[i])) {
+                        for (int i = 0; i < imageForm.length; i++) {
+                            if (!splitLine[i].equals(imageForm[i])) {
                                 containsImage = false;
                             }
                         }
 
-                        if(containsImage) {
-                            return "true";
-                        } else {
-                            return "false";
-                        }
+                        if (containsImage) break;
+                    }
+
+                    if (containsImage) {
+                        return "true";
+                    } else {
+                        return "false";
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-            } else if(input.get("command").toString().equals("run_image")) {
+            } else if (input.get("command").toString().equals("run_image")) {
                 String[] commands = {"./flock_docker.sh", "start", image, "8895"};
 
                 try {
@@ -96,7 +103,7 @@ public class APIReceiverThread extends Thread {
                     String line = null;
 
                     // TODO: return json with ip and port
-                    while( (line = br.readLine()) != null) {
+                    while ((line = br.readLine()) != null) {
                         // TODO: Do something with container output
                         System.out.println(line);
                     }
