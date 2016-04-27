@@ -165,9 +165,7 @@ public class Flock {
                     file.createNewFile();
                 }
 
-                FileWriter fw = null;
-
-                fw = new FileWriter(file.getAbsoluteFile());
+                FileWriter fw = new FileWriter(file.getAbsoluteFile());
 
                 BufferedWriter bw = new BufferedWriter(fw);
 

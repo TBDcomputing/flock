@@ -2,10 +2,18 @@ package com.tbdcomputing.network.leaderelection.bully.state;
 
 import com.tbdcomputing.network.leaderelection.bully.message.BullyElectionMessageType;
 import com.tbdcomputing.network.leaderelection.bully.message.BullyElectionMessageUtils;
+import com.tbdcomputing.network.utils.ExperimentUtils;
 import org.json.JSONObject;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,6 +80,32 @@ public abstract class BullyElectionState {
         log.log(Level.INFO, String.format("Transitioning into %s.", type.name()));
         switch (type) {
             case LEADER:
+                if(!ExperimentUtils.electionStopTimeIsSet){
+                    ExperimentUtils.electionStopTime = System.currentTimeMillis();
+                    ExperimentUtils.electionStopTimeIsSet = true;
+
+                    try {
+                        File file = new File(ExperimentUtils.ELECTION_LOG_FP);
+
+                        if (!file.exists()) {
+                            file.createNewFile();
+                        }
+//                        FileWriter fw = new FileWriter(file.getAbsoluteFile());
+//
+//                        BufferedWriter bw = new BufferedWriter(fw);
+//
+//                        bw.write("Election commenced at: "+ ExperimentUtils.electionStartTime);
+//                        System.out.println("Election commenced at: "+ ExperimentUtils.electionStartTime);
+//
+//                        bw.close();
+
+
+                        Files.write(Paths.get(ExperimentUtils.ELECTION_LOG_FP ), ("\nleader elected at: " + ExperimentUtils.electionStopTime).getBytes(), StandardOpenOption.APPEND);
+                    }catch (IOException e) {
+
+                    }
+                    System.out.println("leader elected at: " + ExperimentUtils.electionStopTime);
+                }
                 return new BullyElectionLeader(this.context);
             case CANDIDATE:
                 return new BullyElectionCandidate(this.context);

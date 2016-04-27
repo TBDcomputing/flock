@@ -51,6 +51,18 @@ public class BullyElectionLeader extends BullyElectionState {
         return this;
     }
 
+
+//    @Override
+//    public BullyElectionState handleSitdown(JSONObject message) {
+//        String alpha = message.getString("alpha");
+//        if (alpha.compareTo(this.context.getAlpha()) <= 0) {
+//            sendSitdownMessage(message.getString("sender"));
+//            return this;
+//        } else {
+//            return transition(BullyElectionStateType.FOLLOWER);
+//        }
+//    }
+
     /**
      * Broadcasts a suppression message to all nodes in the cluster through heartbeats
      */
@@ -58,18 +70,7 @@ public class BullyElectionLeader extends BullyElectionState {
         JSONObject msg = BullyElectionMessageUtils.makeMessage(
                 context.getAlpha(), context.getMyAddr(), BullyElectionMessageType.SITDOWN);
         context.getSender().broadcast(msg, context.getManager().getNodes());
-
-        if(!ExperimentUtils.electionStopTimeIsSet){
-            ExperimentUtils.electionStopTime = System.currentTimeMillis();
-            ExperimentUtils.electionStopTimeIsSet = true;
-
-            try {
-                Files.write(Paths.get(ExperimentUtils.ELECTION_LOG_FP ), ("\nleader elected at: " + ExperimentUtils.electionStopTime).getBytes(), StandardOpenOption.APPEND);
-            }catch (IOException e) {
-                //exception handling left as an exercise for the reader
-            }
-            System.out.println("leader elected at: " + ExperimentUtils.electionStopTime);
-        }
+        System.err.printf("sending suppression");
     }
 
     /**
