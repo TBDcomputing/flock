@@ -128,11 +128,13 @@ public class Flock {
 
                 apiServerThread.interrupt();
 
-                // close the socket so that interrupt will succeed
-                if(apiServer.getSocket() != null) {
-                    apiServer.getSocket().close();
-                }
+
                 try {
+                    // close the socket so that interrupt will succeed
+                    if(apiServer.getSocket() != null) {
+                        apiServer.getSocket().close();
+                    }
+
                     receiverThread.join();
                     broadcasterThread.join();
                     gossipSenderThread.join();
@@ -142,6 +144,8 @@ public class Flock {
                         election.join();
                     }
                 } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
 

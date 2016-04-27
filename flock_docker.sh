@@ -74,6 +74,8 @@ if [[ $1 = "start" ]]; then
 
 	ssh_port=$3
 
+    eval "$(docker-machine env default)"
+
 	# cleans up any old docker images, added because I accumulated so many during testing
 	# docker stop $(docker ps -a -q) > /dev/null 2>/dev/null
 	# docker rm $(docker ps -a -q) > /dev/null 2>/dev/null

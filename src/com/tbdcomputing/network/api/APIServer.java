@@ -57,7 +57,7 @@ public class APIServer {
     public void run() {
         while (listening) {
             try {
-                APIServerThread connection = new APIServerThread(serverSocket.accept(), gossipManager, electionManager, this);
+                APIServerThread connection = new APIServerThread(serverSocket.accept(), gossipManager, electionManager);
 
                 connection.start();
             } catch (IOException e) {

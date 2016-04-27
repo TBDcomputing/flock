@@ -62,9 +62,20 @@ public class APIReceiverThread extends Thread {
 
                     String line = null;
 
+                    String imageForm[] = image.split(":");
+
+                    boolean containsImage;
                     while( (line = br.readLine()) != null) {
-                        if(line.contains(image)) {
-                            // TODO: Return true
+                        containsImage = true;
+
+                        // Handle "centos:7" by splitting on colon and checking if it contains both name and tag
+                        for(int i = 0; i < imageForm.length; i++) {
+                            if (!line.contains(imageForm[i])) {
+                                containsImage = false;
+                            }
+                        }
+
+                        if(containsImage) {
                             return "true";
                         }
                     }
@@ -73,7 +84,7 @@ public class APIReceiverThread extends Thread {
                 }
 
             } else if(input.get("command").toString().equals("run_image")) {
-                String[] commands = {"docker", "start", image};
+                String[] commands = {"./flock_docker.sh", "start", image, "8895"};
 
                 try {
                     Process proc = rt.exec(commands);
@@ -82,9 +93,15 @@ public class APIReceiverThread extends Thread {
 
                     String line = null;
 
+                    // TODO: return json with ip and port
                     while( (line = br.readLine()) != null) {
                         // TODO: Do something with container output
+                        System.out.println(line);
                     }
+                    JSONObject json = new JSONObject();
+                    json.put("ip", socket.getInetAddress().getHostAddress().toString());
+                    json.put("port", "8895");
+                    return json.toString();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -92,4 +109,12 @@ public class APIReceiverThread extends Thread {
         }
         return "";
     }
+
+//    public static void main(String[] args) {
+//        JSONObject json = new JSONObject();
+//        json.put("type", "receive_command");
+//        json.put("image", "centos:7");
+//        json.put("command", "run_image");
+//        System.out.println("Process Command Result: " + processCommand(json.toString()));
+//    }
 }

@@ -6,6 +6,7 @@ import com.tbdcomputing.network.gossip.GossipNode;
 import com.tbdcomputing.network.gossip.GossipStatus;
 import com.tbdcomputing.network.leaderelection.ElectionManager;
 import com.tbdcomputing.network.leaderelection.bully.BullyElectionManager;
+import com.tbdcomputing.network.leaderelection.bully.state.BullyElectionState;
 import com.tbdcomputing.network.leaderelection.state.ElectionState;
 
 import org.json.JSONArray;
@@ -31,14 +32,12 @@ public class APIServerThread extends Thread implements Observer {
     private Socket socket;
     private GossipManager gossipManager;
     private BullyElectionManager electionManager;
-    private APIServer apiServer;
 
-    public APIServerThread(Socket accept, GossipManager gossipManager, BullyElectionManager electionManager, APIServer server) {
+    public APIServerThread(Socket accept, GossipManager gossipManager, BullyElectionManager electionManager) {
         super("APIServerThread");
         socket = accept;
         this.gossipManager = gossipManager;
         this.electionManager = electionManager;
-        apiServer = server;
         gossipManager.addObserver(this);
 
         // TODO: Fix in election manager
@@ -156,10 +155,13 @@ public class APIServerThread extends Thread implements Observer {
             // TODO: Start image on all nodes that have this image
             // TODO: get back container info from nodes that we send this command to.
             String image = input.get("image").toString();
-            String nodesText = input.get("nodes").toString();
+            JSONArray nodesText = input.getJSONArray("nodes");
 
             // TODO: Get IP Addresses from all nodes in nodesText
-            List<GossipNode> nodes = gossipManager.getNodes();
+            List<GossipNode> nodes = new ArrayList<>();
+            for(int i = 0; i < nodesText.length(); i++) {
+                nodes.add(new GossipNode(nodesText.getJSONObject(i)));
+            }
 
             List<String> nodeContainers = new ArrayList<>();
             JSONObject json = new JSONObject();
@@ -213,7 +215,7 @@ public class APIServerThread extends Thread implements Observer {
             // if (o == electionManager.getElectionState())
             // This node's leader changed
 
-            ElectionState state = (ElectionState) arg;
+            BullyElectionState state = (BullyElectionState) arg;
             InetAddress addr = state.getContext().getLeaderAddr();
             json = new JSONObject();
             json.put("type", "new_leader");
