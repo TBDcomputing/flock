@@ -9,6 +9,8 @@ import sys
 import threading
 import time
 
+FLOCK_JAR = "path/to/jar"
+
 HOST = "localhost"
 PORT = 8900
 BUFSIZE = 10240
@@ -49,7 +51,7 @@ def process_message(jsonmsg):
     resp = json.loads(jsonmsg)
 
     if resp["type"] == "nodelist":
-        print "\nNodes (%d):" % (len(resp["nodes"]))
+        print "\nNodes(%d):" % (len(resp["nodes"]))
         print "--------------------"
         for m in resp["nodes"]:
             print m["address"]
@@ -57,7 +59,7 @@ def process_message(jsonmsg):
         print "\nLeader: ssh -p 8895 root@%s" % (resp["leader_ip"])
     elif resp["type"] == "has_image":
         if resp["nodes"]:
-            print "\nNodes (%d) with image:" % (len(resp["nodes"]))
+            print "\nNodes(%d) with image:" % (len(resp["nodes"]))
             print "--------------------"
             for m in resp["nodes"]:
                 print m["address"]
@@ -65,12 +67,13 @@ def process_message(jsonmsg):
             print "\nNo nodes found."
     elif resp["type"] == "run_image":
         if resp["nodes"]:
-            print "\nNodes (%d) running image:" % (len(resp["nodes"]))
+            print "\nNodes(%d) running image:" % (sum(1 for d in resp["nodes"] if d))
             print "--------------------"
             for m in resp["nodes"]:
-                print "ssh -p 8895 root@%s" % (m["address"])
-            else:
-                print "\nNo nodes could run this image."
+                m = json.loads(m)
+                print "ssh -p 8895 root@%s" % (m["ip"][1:])
+        else:
+            print "\nNo nodes ran this image."
 
 
 def send_message(mtype, arg=None):
@@ -156,6 +159,10 @@ class CLI(cmd.Cmd):
 
 
 if __name__ == "__main__":
+    """import subprocess
+                if subprocess.call(["java", "-jar", FLOCK_JAR]):
+                    sys.exit(1)"""
+
     listenerthread = threading.Thread(target=listener)
     listenerthread.start()
 
