@@ -35,6 +35,7 @@ public class GossipNode {
         this.generationTime = this.heartbeat;
         this.status = GossipStatus.NORMAL; // TODO: change to starting and update lifecycle of GossipNode to update status.
         this.alpha = new Alpha();
+
     }
 
 //	public GossipNode(InetAddress addr) {
@@ -153,6 +154,7 @@ public class GossipNode {
             throughputAvg = getThroughputAvg();
 
             alphaValue = throughputAvg + uptimeAvg + (-1*loadAvg) + (-1*latencyAvg);
+            System.out.println(alphaValue);
 
             //TODO all GossipNodes should pass around the Alpha object to each other so that they can make a reliable normalization
             //TODO fix current constructor to use IP if weights can't be obtained
@@ -176,6 +178,7 @@ public class GossipNode {
             throughputAvg = getThroughputAvg();
 
             alphaValue = throughputAvg + uptimeAvg + (-1*loadAvg) + (-1*latencyAvg);
+
         }
 
         /**
