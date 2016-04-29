@@ -228,7 +228,7 @@ public class APIServerThread extends Thread implements Observer {
 
                     // Send the json to that node.
                     PrintWriter out = new PrintWriter(nodeSocket.getOutputStream(), true);
-                    BufferedReader in = new BufferedReader(new InputStreamReader(nodeSocket.getInputStream()));
+//                    BufferedReader in = new BufferedReader(new InputStreamReader(nodeSocket.getInputStream()));
 
                     out.println(json.toString());
 
