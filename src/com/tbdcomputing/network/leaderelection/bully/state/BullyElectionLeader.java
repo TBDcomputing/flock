@@ -54,8 +54,8 @@ public class BullyElectionLeader extends BullyElectionState {
 
     @Override
     public BullyElectionState handleSitdown(JSONObject message) {
-        String alpha = message.getString("alpha");
-        if (alpha.compareTo(this.context.getAlpha()) <= 0) {
+        double alpha = message.getDouble("alpha");
+        if (alpha >= this.context.getAlpha()) {
             sendSitdownMessage(message.getString("sender"));
             return this;
         } else {
@@ -68,7 +68,7 @@ public class BullyElectionLeader extends BullyElectionState {
      */
     private void sendSuppression() {
         JSONObject msg = BullyElectionMessageUtils.makeMessage(
-                context.getAlpha(), context.getMyAddr(), BullyElectionMessageType.SITDOWN);
+                this.context.getAlpha(), context.getMyAddr(), BullyElectionMessageType.SITDOWN);
         context.getSender().broadcast(msg, context.getManager().getNodes());
         System.err.printf("sending suppression");
     }

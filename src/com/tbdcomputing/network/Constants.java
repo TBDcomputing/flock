@@ -18,6 +18,7 @@ public class Constants {
     public static final long GOSSIP_LEAVING_TIMER = 15000;
     public static final int ELECTION_PORT = 8891;
     public static final int ELECTION_RECEIVE_PORT = 8892;
+    public static final String ALPHA_UPTIME_LOG = "./alpha_uptime.txt";
 
     public static String getUUID() {
         try {
