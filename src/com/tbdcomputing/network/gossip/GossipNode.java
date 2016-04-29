@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Random;
 
 
 /**
@@ -215,21 +216,24 @@ public class GossipNode {
          * @return The average load over the past 15 minutes
          */
         public double getLoadAvg() {
-            String[] loadAvgCmd = new String[]{"bash","-c","cat /proc/loadavg"};
-            try {
-                Process p = Runtime.getRuntime().exec(loadAvgCmd);
-
-                BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                String[] output = in.readLine().split("\\s+");
-
-                in.close();
-
-                return Double.parseDouble(output[2]);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return Double.MAX_VALUE;
+//            String[] loadAvgCmd = new String[]{"bash","-c","cat /proc/loadavg"};
+//            try {
+//                Process p = Runtime.getRuntime().exec(loadAvgCmd);
+//
+//                BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+//                String[] output = in.readLine().split("\\s+");
+//
+//                in.close();
+//
+//                return Double.parseDouble(output[2]);
+//
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+            Random random = new Random();
+            double rand = random.nextDouble();
+            double scaled = rand * 3.3;
+            return scaled;
         }
 
         public double getThroughputAvg(){
@@ -242,22 +246,22 @@ public class GossipNode {
         }
 
         public double getUptimeAvg(){
-            try{
-                File file = new File(Constants.ALPHA_UPTIME_LOG);
-
-                if (!file.exists()) {
-                    return System.currentTimeMillis() - Flock.startTime;
-                }else{
-                    FileReader fileReader = new FileReader(Constants.ALPHA_UPTIME_LOG);
-                    BufferedReader bufferedReader = new BufferedReader(fileReader);
-                    long avgUptime = Long.parseLong(bufferedReader.readLine());
-                    bufferedReader.close();
-                    return avgUptime;
-                }
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
+//            try{
+//                File file = new File(Constants.ALPHA_UPTIME_LOG);
+//
+//                if (!file.exists()) {
+//                    return System.currentTimeMillis() - Flock.startTime;
+//                }else{
+//                    FileReader fileReader = new FileReader(Constants.ALPHA_UPTIME_LOG);
+//                    BufferedReader bufferedReader = new BufferedReader(fileReader);
+//                    long avgUptime = Long.parseLong(bufferedReader.readLine());
+//                    bufferedReader.close();
+//                    return avgUptime;
+//                }
+//            }
+//            catch (IOException e) {
+//                e.printStackTrace();
+//            }
             return 0;
         }
 
