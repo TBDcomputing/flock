@@ -90,11 +90,11 @@ public class APIReceiverThread extends Thread {
             } else if (input.getString("command").equals("stop_image")) {
                 Runtime rt = Runtime.getRuntime();
 
-                String[] commands = {"./flock_docker.sh", "stop", image};
+                String[] commands = {"./flock_docker.sh", "stop", image, "8895"};
 
                 try {
                     rt.exec(commands);
-                    return "done";
+                    return "";
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
