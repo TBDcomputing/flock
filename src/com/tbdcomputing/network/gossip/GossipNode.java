@@ -183,21 +183,29 @@ public class GossipNode {
          */
         public double getLatencyAvg(){
 
-            String[] loadAvgCmd = new String[]{"bash","-c","ping -c 4 www.stackoverflow.com | tail -1| awk '{print $4}' | cut -d '/' -f 2"};
-            try {
-                Process p = Runtime.getRuntime().exec(loadAvgCmd);
+            String[] latencyAvgCmd = new String[]{"bash","-c","ping -c 4 www.stackoverflow.com | tail -1| awk '{print $4}' | cut -d '/' -f 2"};
+//            try {
+//                Process p = Runtime.getRuntime().exec(latencyAvgCmd);
+//
+//                BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+//
+//                String[] output = in.readLine().split("\\s+");
+//
+//                if(output[1].equals("unknown")){
+//                    return 350;
+//                }
+//
+//                in.close();
+//
+//                return Double.parseDouble(output[0]);
+//
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                return 350;
+//            }
 
-                BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                String[] output = in.readLine().split("\\s+");
+            return 0;
 
-                in.close();
-
-                return Double.parseDouble(output[0]);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return Double.MAX_VALUE;
         }
 
         /**
