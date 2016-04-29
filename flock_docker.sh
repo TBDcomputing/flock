@@ -139,6 +139,10 @@ if [[ $1 = "stop" ]]; then
 
 	ssh_port=$3
 
+	if [ "$(uname)" == "Darwin" ]; then
+        eval "$(docker-machine env default)"
+    fi
+
 	# cleans up any old docker images, added because I accumulated so many during testing
 	docker stop "${ssh_port}_ssh_${docker_image}"
 	docker rm "${ssh_port}_ssh_${docker_image}"
