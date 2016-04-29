@@ -11,7 +11,7 @@ import time
 
 HOST = "localhost"
 PORT = 8900
-BUFSIZE = 2048
+BUFSIZE = 10240
 
 listenerthread = None
 sock = None
@@ -49,15 +49,15 @@ def process_message(jsonmsg):
     resp = json.loads(jsonmsg)
 
     if resp["type"] == "nodelist":
-        print "\nNodes:"
+        print "\nNodes (%d):" % (len(resp["nodes"]))
         print "--------------------"
         for m in resp["nodes"]:
             print m["address"]
     elif resp["type"] == "leader_ip":
-        print "\nLeader: %s" % (resp["leader_ip"])
+        print "\nLeader: ssh -p 8895 root@%s" % (resp["leader_ip"])
     elif resp["type"] == "has_image":
         if resp["nodes"]:
-            print "\nNodes with image:"
+            print "\nNodes (%d) with image:" % (len(resp["nodes"]))
             print "--------------------"
             for m in resp["nodes"]:
                 print m["address"]
@@ -65,10 +65,10 @@ def process_message(jsonmsg):
             print "\nNo nodes found."
     elif resp["type"] == "run_image":
         if resp["nodes"]:
-            print "\nNodes running image:"
+            print "\nNodes (%d) running image:" % (len(resp["nodes"]))
             print "--------------------"
             for m in resp["nodes"]:
-                print m["address"]
+                print "ssh -p 8895 root@%s" % (m["address"])
             else:
                 print "\nNo nodes could run this image."
 
