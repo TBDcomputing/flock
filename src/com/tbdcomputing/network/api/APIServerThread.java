@@ -92,8 +92,11 @@ public class APIServerThread extends Thread implements Observer {
 
             // Serialize and send our entire list of nodes
             // TODO: should we only send the IP?
+            JSONObject jsonObject = new JSONObject();
             JSONArray json = new JSONArray(copyNodes.parallelStream().map(GossipNode::toJSON).toArray());
-            return json.toString();
+            jsonObject.put("type", "nodelist");
+            jsonObject.put("nodes", json);
+            return jsonObject.toString();
         } else if(input.get("type").toString().equals("leader")) {
             // get leader ip and send json back
             InetAddress leader = electionManager.getElectionState().getContext().getLeaderAddr();
@@ -105,6 +108,7 @@ public class APIServerThread extends Thread implements Observer {
             return json.toString();
         } else if(input.get("type").toString().equals("start_election")) {
             electionManager.startElection();
+
             return "";
         } else if(input.get("type").toString().equals("has_image")) {
             // Parse image and send it to each node.
@@ -147,8 +151,11 @@ public class APIServerThread extends Thread implements Observer {
             }
 
             // Return array of nodes that have the image
+            JSONObject jsonObject = new JSONObject();
             JSONArray jsonResult = new JSONArray(nodesWithImage.parallelStream().map(GossipNode::toJSON).toArray());
-            return jsonResult.toString();
+            jsonObject.put("type", "has_image");
+            jsonObject.put("nodes", jsonResult);
+            return jsonObject.toString();
 
         } else if(input.get("type").toString().equals("run_image")) {
             // TODO: Start image on all nodes that have this image
@@ -197,8 +204,11 @@ public class APIServerThread extends Thread implements Observer {
             }
 
             // Return array of nodes that have the image
+            JSONObject jsonObject = new JSONObject();
             JSONArray jsonResult = new JSONArray(nodeContainers.toArray());
-            return jsonResult.toString();
+            jsonObject.put("type", "run_image");
+            jsonObject.put("nodes", jsonResult);
+            return jsonObject.toString();
         } else if(input.getString("type").equals("stop_image")) {
             // Parse image and send it to each node.
             String image = input.get("image").toString();
@@ -228,7 +238,7 @@ public class APIServerThread extends Thread implements Observer {
                 }
 
             }
-            return "done";
+            return "";
 
         }
 
