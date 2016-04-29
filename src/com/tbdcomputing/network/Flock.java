@@ -153,7 +153,7 @@ public class Flock {
                 break;
             } else if (cmd[0].equals("elect") && running) {
 
-                if(ExperimentUtils.PROXY_MODE){
+//                if(ExperimentUtils.PROXY_MODE){
 
                     //TODO fix delay
 //                    long start_time = Long.parseLong(cmd[1]);
@@ -164,35 +164,35 @@ public class Flock {
 //                        e.printStackTrace();
 //                    }
 
-                }
+//                }
                 startElection();
             }
         }
     }
 
     private static void startElection() {
-        ExperimentUtils.electionStartTime = System.currentTimeMillis();
 
-        try{
-            File file = new File(ExperimentUtils.ELECTION_LOG_FP);
+        if(ExperimentUtils.PROXY_MODE){
+            ExperimentUtils.electionStartTime = System.currentTimeMillis();
+            try{
+                File file = new File(ExperimentUtils.ELECTION_LOG_FP);
 
-            if (!file.exists()) {
-                file.createNewFile();
+                if (!file.exists()) {
+                    file.createNewFile();
+                }
+
+                FileWriter fw = new FileWriter(file.getAbsoluteFile());
+
+                BufferedWriter bw = new BufferedWriter(fw);
+
+                bw.write("Election commenced at: "+ ExperimentUtils.electionStartTime);
+                System.out.println("Election commenced at: "+ ExperimentUtils.electionStartTime);
+
+                bw.close();
             }
-
-            FileWriter fw = null;
-
-            fw = new FileWriter(file.getAbsoluteFile());
-
-            BufferedWriter bw = new BufferedWriter(fw);
-
-            bw.write("Election commenced at: "+ ExperimentUtils.electionStartTime);
-            System.out.println("Election commenced at: "+ ExperimentUtils.electionStartTime);
-
-            bw.close();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
+            catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         election.startElection();

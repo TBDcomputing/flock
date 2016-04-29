@@ -6,6 +6,7 @@ import com.tbdcomputing.network.leaderelection.bully.message.BullyElectionMessag
 import org.json.JSONObject;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 
 /**
@@ -38,6 +39,22 @@ public class BullyElectionCandidate extends BullyElectionState {
         } else {
             sendSitdownMessage(message.getString("sender"));
             return this;
+        }
+    }
+
+    @Override
+    public BullyElectionState handleSitdown(JSONObject message) {
+        String alpha = message.getString("alpha");
+        if (alpha.compareTo(this.context.getAlpha()) <= 0) {
+            sendSitdownMessage(message.getString("sender"));
+            return this;
+        } else {
+            try {
+                context.setLeaderAddr(InetAddress.getByName(message.getString("sender")));
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
+            return transition(BullyElectionStateType.FOLLOWER);
         }
     }
 

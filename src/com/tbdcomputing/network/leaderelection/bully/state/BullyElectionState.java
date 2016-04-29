@@ -2,11 +2,18 @@ package com.tbdcomputing.network.leaderelection.bully.state;
 
 import com.tbdcomputing.network.leaderelection.bully.message.BullyElectionMessageType;
 import com.tbdcomputing.network.leaderelection.bully.message.BullyElectionMessageUtils;
+import com.tbdcomputing.network.utils.ExperimentUtils;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Observable;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,9 +30,8 @@ public abstract class BullyElectionState extends Observable {
 
     public abstract BullyElectionState handleElection(JSONObject message);
 
-    public BullyElectionState handleSitdown(JSONObject message) {
-        return transition(BullyElectionStateType.FOLLOWER);
-    }
+
+    public abstract BullyElectionState handleSitdown(JSONObject message);
 
     /**
      * @return timeout in milliseconds (0 implies no timeout)
@@ -73,6 +79,33 @@ public abstract class BullyElectionState extends Observable {
         log.log(Level.INFO, String.format("Transitioning into %s.", type.name()));
         switch (type) {
             case LEADER:
+                if(!ExperimentUtils.electionStopTimeIsSet){
+                    ExperimentUtils.electionStopTime = System.currentTimeMillis();
+                    ExperimentUtils.electionStopTimeIsSet = true;
+
+                    try {
+                        File file = new File(ExperimentUtils.ELECTION_LOG_FP);
+
+                        if (!file.exists()) {
+                            file.createNewFile();
+                        }
+//                        FileWriter fw = new FileWriter(file.getAbsoluteFile());
+//
+//                        BufferedWriter bw = new BufferedWriter(fw);
+//
+//                        bw.write("Election commenced at: "+ ExperimentUtils.electionStartTime);
+//                        System.out.println("Election commenced at: "+ ExperimentUtils.electionStartTime);
+//
+//                        bw.close();
+
+
+                        Files.write(Paths.get(ExperimentUtils.ELECTION_LOG_FP ), ("\nleader elected at: " + ExperimentUtils.electionStopTime).getBytes(), StandardOpenOption.APPEND);
+                    }catch (IOException e) {
+
+                    }
+                    System.out.println("leader elected at: " + ExperimentUtils.electionStopTime);
+                }
+                context.setLeaderAddr(context.getMyAddr());
                 return new BullyElectionLeader(this.context);
             case CANDIDATE:
                 return new BullyElectionCandidate(this.context);
