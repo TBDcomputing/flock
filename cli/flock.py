@@ -46,16 +46,36 @@ def listener():
 
 
 def process_message(jsonmsg):
-    msg = json.loads(jsonmsg)
-    print msg
-    # TODO: handle arrays like from nodelist
-    for k, v in msg.items():
-        print k, v
+    resp = json.loads(jsonmsg)
+
+    if resp["type"] == "nodelist":
+        print "\nNodes:"
+        print "--------------------"
+        for m in resp["nodes"]:
+            print m["address"]
+    elif resp["type"] == "leader_ip":
+        print "\nLeader: %s" % (resp["leader_ip"])
+    elif resp["type"] == "has_image":
+        if resp["nodes"]:
+            print "\nNodes with image:"
+            print "--------------------"
+            for m in resp["nodes"]:
+                print m["address"]
+        else:
+            print "\nNo nodes found."
+    elif resp["type"] == "run_image":
+        if resp["nodes"]:
+            print "\nNodes running image:"
+            print "--------------------"
+            for m in resp["nodes"]:
+                print m["address"]
+            else:
+                print "\nNo nodes could run this image."
 
 
 def send_message(mtype, arg=None):
     msg = {"type": mtype}
-    if (mtype == "has_image" or mtype == "run_image") and arg:
+    if mtype in ["has_image", "run_image", "stop_image"] and arg:
         msg["image"] = arg
 
     jsonmsg = json.dumps(msg)
@@ -88,6 +108,10 @@ class CLI(cmd.Cmd):
         print "Asks Flock to spin up containers with the specified image."
         print "run_image <image>"
 
+    def help_stop_image(self):
+        print "Asks Flock to shut down containers with the specified image."
+        print "stop_image <image>"
+
     def help_start_election(self):
         print "Starts an election on Flock to determine the leader of the cluster."
 
@@ -114,6 +138,12 @@ class CLI(cmd.Cmd):
             print "error: run_image <image>"
         else:
             send_message(mtype="run_image", arg=image)
+
+    def do_stop_image(self, image):
+        if not image:
+            print "error: stop_image <image>"
+        else:
+            send_message(mtype="stop_image", arg=image)
 
     def do_start_election(self, s):
         send_message(mtype="start_election")
