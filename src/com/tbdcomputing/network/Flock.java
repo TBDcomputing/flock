@@ -81,7 +81,7 @@ public class Flock {
     private static BullyElectionManager election;
 
     public static void main(String[] args) {
-
+        startTime = System.currentTimeMillis();
         attachShutDownHook();
 
         Scanner cmdLine = new Scanner(System.in);
@@ -91,7 +91,7 @@ public class Flock {
                 cmd[i] = cmd[i].toLowerCase();
             }
             if (cmd[0].equals("start") && !running) {
-                startTime = System.currentTimeMillis();
+
                 running = true;
                 if(cmd.length == 2 && cmd[1].equals("proxy")){
                     ExperimentUtils.PROXY_MODE = true;

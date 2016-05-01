@@ -33,7 +33,7 @@ public class BullyElectionCandidate extends BullyElectionState {
         double alpha = message.getDouble("alpha");
 
         System.err.printf("Comparing alpha: %s to my alpha: %s\n", alpha, this.context.getAlpha());
-        if (alpha >= this.context.getAlpha()) {
+        if (alpha <= this.context.getAlpha()) {
             return transition(BullyElectionStateType.FOLLOWER);
         } else {
             sendSitdownMessage(message.getString("sender"));
@@ -44,7 +44,7 @@ public class BullyElectionCandidate extends BullyElectionState {
     @Override
     public BullyElectionState handleSitdown(JSONObject message) {
         double alpha = message.getDouble("alpha");
-        if (alpha >= this.context.getAlpha()) {
+        if (alpha <= this.context.getAlpha()) {
             sendSitdownMessage(message.getString("sender"));
             return this;
         } else {

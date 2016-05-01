@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Random;
 
 
@@ -148,24 +149,7 @@ public class GossipNode {
         double throughputAvg;
 
         public Alpha(){
-
-            latencyAvg = getLatencyAvg();
-            loadAvg = getLoadAvg();
-            uptimeAvg = getUptimeAvg();
-            throughputAvg = getThroughputAvg();
-
-            alphaValue = throughputAvg + uptimeAvg + (-1*loadAvg) + (-1*latencyAvg);
-            System.out.println(alphaValue);
-
-            //TODO all GossipNodes should pass around the Alpha object to each other so that they can make a reliable normalization
-            //TODO fix current constructor to use IP if weights can't be obtained
-            //TODO add in constructor that takes in weight preferences
-            //TODO election needs to be modified to take into account which preferences the user decided they wanted to elect on
-            //TODO election could be modified to stop election messages from being sent to already determined followers
-            //TODO constructor creates Alpha object,
-            //TODO put this class in gossipnode as a private class
-            //TODO code refreshAlpha method
-            //TODO add requestlimitexceeded retry to current ec2 client
+            refreshAlpha();
         }
 
         public Alpha(JSONObject configuration){
@@ -174,11 +158,27 @@ public class GossipNode {
 
         public void refreshAlpha(){
             latencyAvg = getLatencyAvg();
+
             loadAvg = getLoadAvg();
             uptimeAvg = getUptimeAvg();
             throughputAvg = getThroughputAvg();
 
+            System.out.println("latency: "+ latencyAvg);
+            System.out.println("loadavg: "+loadAvg);
+            System.out.println("uptimeavg: "+uptimeAvg);
+
+            latencyAvg = ((latencyAvg) / (500));
+            loadAvg = ((loadAvg) / (3));
+            uptimeAvg = uptimeAvg/1000;
+            uptimeAvg = ((uptimeAvg) / (3600));
+
+
+            System.out.println("latencyalpha: "+ latencyAvg);
+            System.out.println("loadalpha: "+loadAvg);
+            System.out.println("uptimealpha: "+uptimeAvg);
+
             alphaValue = throughputAvg + uptimeAvg + (-1*loadAvg) + (-1*latencyAvg);
+            System.out.println("alpha: " + alphaValue);
 
         }
 
@@ -188,48 +188,46 @@ public class GossipNode {
         public double getLatencyAvg(){
 
             String[] latencyAvgCmd = new String[]{"bash","-c","ping -c 4 www.stackoverflow.com | tail -1| awk '{print $4}' | cut -d '/' -f 2"};
-//            try {
-//                Process p = Runtime.getRuntime().exec(latencyAvgCmd);
-//
-//                BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-//
-//                String[] output = in.readLine().split("\\s+");
-//
-//                if(output[1].equals("unknown")){
-//                    return 350;
-//                }
-//
-//                in.close();
-//
-//                return Double.parseDouble(output[0]);
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//                return 350;
-//            }
+            try {
+                Process p = Runtime.getRuntime().exec(latencyAvgCmd);
 
-            return 0;
+                BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
+                String[] output = in.readLine().split("\\s+");
+                System.out.println(Arrays.toString(output));
+
+                if(output.length > 1 && output[1].equals("unknown")){
+                    return 500;
+                }
+
+                in.close();
+
+                return Double.parseDouble(output[0]);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                return 500;
+            }
         }
 
         /**
          * @return The average load over the past 15 minutes
          */
         public double getLoadAvg() {
-//            String[] loadAvgCmd = new String[]{"bash","-c","cat /proc/loadavg"};
-//            try {
-//                Process p = Runtime.getRuntime().exec(loadAvgCmd);
-//
-//                BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-//                String[] output = in.readLine().split("\\s+");
-//
-//                in.close();
-//
-//                return Double.parseDouble(output[2]);
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
+            String[] loadAvgCmd = new String[]{"bash","-c","cat /proc/loadavg"};
+            try {
+                Process p = Runtime.getRuntime().exec(loadAvgCmd);
+
+                BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                String[] output = in.readLine().split("\\s+");
+
+                in.close();
+
+                return Double.parseDouble(output[2]);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             Random random = new Random();
             double rand = random.nextDouble();
             double scaled = rand * 3.3;
@@ -246,22 +244,22 @@ public class GossipNode {
         }
 
         public double getUptimeAvg(){
-//            try{
-//                File file = new File(Constants.ALPHA_UPTIME_LOG);
-//
-//                if (!file.exists()) {
-//                    return System.currentTimeMillis() - Flock.startTime;
-//                }else{
-//                    FileReader fileReader = new FileReader(Constants.ALPHA_UPTIME_LOG);
-//                    BufferedReader bufferedReader = new BufferedReader(fileReader);
-//                    long avgUptime = Long.parseLong(bufferedReader.readLine());
-//                    bufferedReader.close();
-//                    return avgUptime;
-//                }
-//            }
-//            catch (IOException e) {
-//                e.printStackTrace();
-//            }
+            try{
+                File file = new File(Constants.ALPHA_UPTIME_LOG);
+
+                if (!file.exists()) {
+                    return System.currentTimeMillis() - Flock.startTime;
+                }else{
+                    FileReader fileReader = new FileReader(Constants.ALPHA_UPTIME_LOG);
+                    BufferedReader bufferedReader = new BufferedReader(fileReader);
+                    long avgUptime = Long.parseLong(bufferedReader.readLine());
+                    bufferedReader.close();
+                    return avgUptime;
+                }
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
             return 0;
         }
 

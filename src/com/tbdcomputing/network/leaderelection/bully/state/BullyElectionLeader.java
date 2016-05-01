@@ -55,7 +55,7 @@ public class BullyElectionLeader extends BullyElectionState {
     @Override
     public BullyElectionState handleSitdown(JSONObject message) {
         double alpha = message.getDouble("alpha");
-        if (alpha >= this.context.getAlpha()) {
+        if (alpha <= this.context.getAlpha()) {
             sendSitdownMessage(message.getString("sender"));
             return this;
         } else {
