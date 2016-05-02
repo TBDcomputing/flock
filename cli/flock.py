@@ -9,9 +9,11 @@ import sys
 import threading
 import time
 
+FLOCK_JAR = "path/to/jar"
+
 HOST = "localhost"
 PORT = 8900
-BUFSIZE = 2048
+BUFSIZE = 10240
 
 listenerthread = None
 sock = None
@@ -46,18 +48,42 @@ def listener():
 
 
 def process_message(jsonmsg):
-    msg = json.loads(jsonmsg)
-    for k, v in msg.items():
-        print k, v
+    resp = json.loads(jsonmsg)
+
+    if resp["type"] == "nodelist":
+        print "\nNodes(%d):" % (len(resp["nodes"]))
+        print "--------------------"
+        for m in resp["nodes"]:
+            print m["address"]
+    elif resp["type"] == "leader_ip":
+        print "\nLeader: ssh -p 8895 root@%s" % (resp["leader_ip"])
+    elif resp["type"] == "has_image":
+        if resp["nodes"]:
+            print "\nNodes(%d) with image:" % (len(resp["nodes"]))
+            print "--------------------"
+            for m in resp["nodes"]:
+                print m["address"]
+        else:
+            print "\nNo nodes found."
+    elif resp["type"] == "run_image":
+        if resp["nodes"]:
+            print "\nNodes(%d) running image:" % (sum(1 for d in resp["nodes"] if d))
+            print "--------------------"
+            for m in resp["nodes"]:
+                m = json.loads(m)
+                print "ssh -p 8895 root@%s" % (m["ip"][1:])
+        else:
+            print "\nNo nodes ran this image."
 
 
 def send_message(mtype, arg=None):
     msg = {"type": mtype}
-    if (mtype == "has_image" or mtype == "run_image") and arg:
+    if mtype in ["has_image", "run_image", "stop_image"] and arg:
         msg["image"] = arg
 
     jsonmsg = json.dumps(msg)
-    sock.sendall(jsonmsg)
+    # added new line since it uses readLine() in Java
+    sock.sendall(jsonmsg + '\n')
 
 
 class CLI(cmd.Cmd):
@@ -84,6 +110,10 @@ class CLI(cmd.Cmd):
     def help_run_image(self):
         print "Asks Flock to spin up containers with the specified image."
         print "run_image <image>"
+
+    def help_stop_image(self):
+        print "Asks Flock to shut down containers with the specified image."
+        print "stop_image <image>"
 
     def help_start_election(self):
         print "Starts an election on Flock to determine the leader of the cluster."
@@ -112,6 +142,12 @@ class CLI(cmd.Cmd):
         else:
             send_message(mtype="run_image", arg=image)
 
+    def do_stop_image(self, image):
+        if not image:
+            print "error: stop_image <image>"
+        else:
+            send_message(mtype="stop_image", arg=image)
+
     def do_start_election(self, s):
         send_message(mtype="start_election")
 
@@ -123,6 +159,10 @@ class CLI(cmd.Cmd):
 
 
 if __name__ == "__main__":
+    """import subprocess
+                if subprocess.call(["java", "-jar", FLOCK_JAR]):
+                    sys.exit(1)"""
+
     listenerthread = threading.Thread(target=listener)
     listenerthread.start()
 

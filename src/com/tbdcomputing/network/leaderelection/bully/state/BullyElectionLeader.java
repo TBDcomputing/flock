@@ -10,6 +10,8 @@ import com.tbdcomputing.network.utils.ExperimentUtils;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -59,6 +61,11 @@ public class BullyElectionLeader extends BullyElectionState {
             sendSitdownMessage(message.getString("sender"));
             return this;
         } else {
+            try {
+                context.setLeaderAddr(InetAddress.getByName(message.getString("sender")));
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
             return transition(BullyElectionStateType.FOLLOWER);
         }
     }

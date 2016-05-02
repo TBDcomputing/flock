@@ -16,6 +16,7 @@ public class BullyElectionStateContext {
     private GossipManager manager;
     private ElectionSender sender;
     private InetAddress myAddr;
+    private InetAddress leaderAddr;
 
     public BullyElectionStateContext(GossipManager manager, ElectionSender sender) {
         this.manager = manager;
@@ -58,5 +59,13 @@ public class BullyElectionStateContext {
 
     public void setMyAddr(InetAddress myAddr) {
         this.myAddr = myAddr;
+    }
+
+    public InetAddress getLeaderAddr() {
+        return leaderAddr;
+    }
+
+    public void setLeaderAddr(InetAddress leaderAddr) {
+        this.leaderAddr = leaderAddr;
     }
 }

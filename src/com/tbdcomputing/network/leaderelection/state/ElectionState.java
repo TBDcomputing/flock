@@ -6,13 +6,14 @@ import org.json.JSONObject;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Observable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Standard ElectionState class which Followers, Candidates, and Leaders extend.
  */
-public abstract class ElectionState {
+public abstract class ElectionState extends Observable {
     protected final Logger log = Logger.getLogger(ElectionState.class.getName());
     protected ElectionStateContext context;
 
@@ -65,6 +66,7 @@ public abstract class ElectionState {
             if ("heartbeat".equals(message.getString("type"))) {
                 try {
                     context.setLeaderAddr(InetAddress.getByName(message.getString("sender")));
+                    notifyObservers(context.getLeaderAddr());
                 } catch (UnknownHostException e) {
                     log.log(Level.SEVERE, "Cannot find leader node's address. It has died, or there is a serious problem.");
                 }
@@ -127,6 +129,10 @@ public abstract class ElectionState {
             default:
                 return null;
         }
+    }
+
+    public ElectionStateContext getContext() {
+        return context;
     }
 
 }

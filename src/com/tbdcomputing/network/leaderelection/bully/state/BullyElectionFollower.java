@@ -3,6 +3,9 @@ package com.tbdcomputing.network.leaderelection.bully.state;
 import com.tbdcomputing.network.leaderelection.bully.BullyElectionSettings;
 import org.json.JSONObject;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 /**
  * Created by dpho on 3/11/16.
  *
@@ -44,6 +47,11 @@ public class BullyElectionFollower extends BullyElectionState {
             sendSitdownMessage(message.getString("sender"));
             return transition(BullyElectionStateType.CANDIDATE);
         } else {
+            try {
+                context.setLeaderAddr(InetAddress.getByName(message.getString("sender")));
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
             return this;
         }
     }

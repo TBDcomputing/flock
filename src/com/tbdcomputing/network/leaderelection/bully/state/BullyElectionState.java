@@ -5,22 +5,22 @@ import com.tbdcomputing.network.leaderelection.bully.message.BullyElectionMessag
 import com.tbdcomputing.network.utils.ExperimentUtils;
 import org.json.JSONObject;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Observable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Standard ElectionState class which Followers, Candidates, and Leaders extend.
  */
-public abstract class BullyElectionState {
+public abstract class BullyElectionState extends Observable {
     protected final Logger log = Logger.getLogger(BullyElectionState.class.getName());
     protected BullyElectionStateContext context;
 
@@ -105,6 +105,7 @@ public abstract class BullyElectionState {
                     }
                     System.out.println("leader elected at: " + ExperimentUtils.electionStopTime);
                 }
+                context.setLeaderAddr(context.getMyAddr());
                 return new BullyElectionLeader(this.context);
             case CANDIDATE:
                 return new BullyElectionCandidate(this.context);
@@ -113,6 +114,10 @@ public abstract class BullyElectionState {
             default:
                 return null;
         }
+    }
+
+    public BullyElectionStateContext getContext() {
+        return context;
     }
 
 }

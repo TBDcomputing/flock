@@ -6,6 +6,7 @@ print_help() {
 	echo -e "\t$script_name help\n\t\t to see this prompt."
 	echo -e "\t$script_name open [PORT NUMBER]\n\t\t for opening ports for the VM (Mac only)"
 	echo -e "\t$script_name vmports\n\t\t for listing the forwarding rules for the VM (Mac only)"
+	echo -e "\t$script_name images \n\t\t to list the docker images"
 	echo -e "\t$script_name start [DOCKER_IMAGE] [PORT NUMBER]\n\t\t to start a new docker image with SSH available at the given port"
 	echo -e "\t$script_name stop [DOCKER_IMAGE] [PORT NUMBER]\n\t\t to stop the container with the docker image/port combination"
 }
@@ -54,6 +55,16 @@ if [[ $1 = "vmports" ]]; then
     exit
 fi
 
+# list docker images
+if [[ $1 = "images" ]]; then
+    if [ "$(uname)" == "Darwin" ]; then
+        eval "$(docker-machine env default)"
+    fi
+
+    docker images
+    exit
+fi
+
 # start docker image
 if [[ $1 = "start" ]]; then
 	if [[ $# -ne 3 ]]; then
@@ -73,6 +84,10 @@ if [[ $1 = "start" ]]; then
 	fi
 
 	ssh_port=$3
+
+	if [ "$(uname)" == "Darwin" ]; then
+        eval "$(docker-machine env default)"
+    fi
 
 	# cleans up any old docker images, added because I accumulated so many during testing
 	# docker stop $(docker ps -a -q) > /dev/null 2>/dev/null
@@ -123,6 +138,10 @@ if [[ $1 = "stop" ]]; then
 	fi
 
 	ssh_port=$3
+
+	if [ "$(uname)" == "Darwin" ]; then
+        eval "$(docker-machine env default)"
+    fi
 
 	# cleans up any old docker images, added because I accumulated so many during testing
 	docker stop "${ssh_port}_ssh_${docker_image}"
