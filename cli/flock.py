@@ -66,8 +66,9 @@ def process_message(jsonmsg):
         else:
             print "\nNo nodes found."
     elif resp["type"] == "run_image":
+        resp["nodes"] = [c for c in resp["nodes"] if c]
         if resp["nodes"]:
-            print "\nNodes(%d) running image:" % (sum(1 for d in resp["nodes"] if d))
+            print "\nNodes(%d) running image:" % (len(resp["nodes"]))
             print "--------------------"
             for m in resp["nodes"]:
                 m = json.loads(m)
@@ -159,9 +160,13 @@ class CLI(cmd.Cmd):
 
 
 if __name__ == "__main__":
-    """import subprocess
-                if subprocess.call(["java", "-jar", FLOCK_JAR]):
-                    sys.exit(1)"""
+    """
+    import subprocess
+    if subprocess.call(["java", "-jar", FLOCK_JAR]):
+        sys.exit(1)
+    print "Flock is starting up ..."
+    time.sleep(2)
+    """
 
     listenerthread = threading.Thread(target=listener)
     listenerthread.start()
