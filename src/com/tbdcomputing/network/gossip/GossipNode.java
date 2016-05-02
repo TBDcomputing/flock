@@ -149,7 +149,9 @@ public class GossipNode {
         double throughputAvg;
 
         public Alpha(){
+            Flock.getOS();
             refreshAlpha();
+            //TODO add mac support
         }
 
         public Alpha(JSONObject configuration){
@@ -172,11 +174,6 @@ public class GossipNode {
             uptimeAvg = uptimeAvg/1000;
             uptimeAvg = ((uptimeAvg) / (3600));
 
-
-            System.out.println("latencyalpha: "+ latencyAvg);
-            System.out.println("loadalpha: "+loadAvg);
-            System.out.println("uptimealpha: "+uptimeAvg);
-
             alphaValue = throughputAvg + uptimeAvg + (-1*loadAvg) + (-1*latencyAvg);
             System.out.println("alpha: " + alphaValue);
 
@@ -187,51 +184,55 @@ public class GossipNode {
          */
         public double getLatencyAvg(){
 
-            String[] latencyAvgCmd = new String[]{"bash","-c","ping -c 4 www.stackoverflow.com | tail -1| awk '{print $4}' | cut -d '/' -f 2"};
-            try {
-                Process p = Runtime.getRuntime().exec(latencyAvgCmd);
-
-                BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-                String[] output = in.readLine().split("\\s+");
-                System.out.println(Arrays.toString(output));
-
-                if(output.length > 1 && output[1].equals("unknown")){
-                    return 500;
-                }
-
-                in.close();
-
-                return Double.parseDouble(output[0]);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                return 500;
-            }
+            //For now, we cannot use latency, since the demo is on Andriy's router
+            return 350;
+//            String[] latencyAvgCmd = new String[]{"bash","-c","ping -c 4 www.stackoverflow.com | tail -1| awk '{print $4}' | cut -d '/' -f 2"};
+//            try {
+//                Process p = Runtime.getRuntime().exec(latencyAvgCmd);
+//
+//                BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+//
+//                String[] output = in.readLine().split("\\s+");
+//
+//                if(output.length > 1 && output[1].equals("unknown")){
+//                    return 500;
+//                }
+//
+//                in.close();
+//
+//                return Double.parseDouble(output[0]);
+//
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                return 500;
+//            }
         }
 
         /**
          * @return The average load over the past 15 minutes
          */
         public double getLoadAvg() {
-            String[] loadAvgCmd = new String[]{"bash","-c","cat /proc/loadavg"};
-            try {
-                Process p = Runtime.getRuntime().exec(loadAvgCmd);
+            if(Flock.os == Flock.OS.LINUX){
+                String[] loadAvgCmd = new String[]{"bash","-c","cat /proc/loadavg"};
+                try {
+                    Process p = Runtime.getRuntime().exec(loadAvgCmd);
 
-                BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                String[] output = in.readLine().split("\\s+");
+                    BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                    String[] output = in.readLine().split("\\s+");
 
-                in.close();
+                    in.close();
 
-                return Double.parseDouble(output[2]);
+                    return Double.parseDouble(output[2]);
 
-            } catch (IOException e) {
-                e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return 5;
+                }
+            }else{
+                //TODO get equivalent command for mac
+                return 5;
             }
-            Random random = new Random();
-            double rand = random.nextDouble();
-            double scaled = rand * 3.3;
-            return scaled;
+
         }
 
         public double getThroughputAvg(){
@@ -248,7 +249,8 @@ public class GossipNode {
                 File file = new File(Constants.ALPHA_UPTIME_LOG);
 
                 if (!file.exists()) {
-                    return System.currentTimeMillis() - Flock.startTime;
+                    Flock.startTime = System.currentTimeMillis();
+                    return 1000;
                 }else{
                     FileReader fileReader = new FileReader(Constants.ALPHA_UPTIME_LOG);
                     BufferedReader bufferedReader = new BufferedReader(fileReader);

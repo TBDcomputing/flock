@@ -5,6 +5,7 @@ import com.tbdcomputing.network.leaderelection.ElectionSender;
 import com.tbdcomputing.network.utils.ExperimentUtils;
 
 import java.net.InetAddress;
+import java.util.Arrays;
 
 /**
  * Created by dpho on 3/12/16.
@@ -29,7 +30,7 @@ public class BullyElectionStateContext {
             for(String s: addr){
                 sb.append(s);
             }
-            return Integer.valueOf(sb.toString());
+            return Integer.valueOf(sb.toString()).doubleValue();
         }else{
             return manager.getMe().getAlphaValue();
         }

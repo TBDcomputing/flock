@@ -28,6 +28,8 @@ public class Flock {
 
     private static boolean running = false;
     public static long startTime;
+    public static OS os = null;
+
 
     private static Thread gossipReceiverThread;
     private static Thread gossipSenderThread;
@@ -282,6 +284,28 @@ public class Flock {
 
         election = new BullyElectionManager(manager);
         election.start();
+    }
+
+    public enum OS {
+        WINDOWS, LINUX, MAC, SOLARIS
+    };
+
+    public static OS getOS() {
+
+        if (Flock.os == null) {
+            String operSys = System.getProperty("os.name").toLowerCase();
+            if (operSys.contains("win")) {
+                Flock.os = OS.WINDOWS;
+            } else if (operSys.contains("nix") || operSys.contains("nux")
+                    || operSys.contains("aix")) {
+                Flock.os = OS.LINUX;
+            } else if (operSys.contains("mac")) {
+                Flock.os = OS.MAC;
+            } else if (operSys.contains("sunos")) {
+                Flock.os = OS.SOLARIS;
+            }
+        }
+        return os;
     }
 
 }

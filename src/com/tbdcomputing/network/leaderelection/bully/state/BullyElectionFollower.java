@@ -29,7 +29,7 @@ public class BullyElectionFollower extends BullyElectionState {
         // TODO: Change to Double
         double alpha = message.getDouble("alpha");
         System.err.printf("Comparing alpha: %s to my alpha: %s\n", alpha, this.context.getAlpha());
-        if (alpha <= this.context.getAlpha()) {
+        if (alpha >= this.context.getAlpha()) {
             return this;
         } else {
             sendSitdownMessage(message.getString("sender"));
