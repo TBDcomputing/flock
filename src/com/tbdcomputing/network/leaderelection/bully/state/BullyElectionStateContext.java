@@ -25,7 +25,7 @@ public class BullyElectionStateContext {
     }
 
     public double getAlpha() {
-        if(ExperimentUtils.PROXY_MODE){ //use last IP digits instead of alpha value for experimental elections
+        if(!ExperimentUtils.PROXY_MODE){ //use last IP digits instead of alpha value for experimental elections
             String[] addr = manager.getMe().getAddr().getHostAddress().split("\\.");
             StringBuilder sb = new StringBuilder();
             for(String s: addr){
