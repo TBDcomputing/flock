@@ -96,7 +96,11 @@ if [[ $1 = "start" ]]; then
 	# this is the setup SSH server in the container method
 	rm -f Dockerfile
 	cp Dockerfile.example Dockerfile
-	sed -i '' 's/dockerimage/'"$docker_image"':'"$docker_image_version"'/g' Dockerfile
+	if [ "$(uname)" == "Darwin" ]; then
+        sed -i '' 's/dockerimage/'"$docker_image"':'"$docker_image_version"'/g' Dockerfile
+    else
+		sed -i 's/dockerimage/'"$docker_image"':'"$docker_image_version"'/g' Dockerfile
+	fi
 	docker build -t "ssh_${docker_image}:${docker_image_version}" .
 	docker_id=$(docker run -d --name ${ssh_port}_ssh_${docker_image} -p $ssh_port:22 ssh_${docker_image}:${docker_image_version})
 	# docker attach "$docker_id"
