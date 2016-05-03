@@ -2,6 +2,7 @@ package com.tbdcomputing.network.gossip;
 
 import com.tbdcomputing.network.Constants;
 import com.tbdcomputing.network.Flock;
+import com.tbdcomputing.network.leaderelection.bully.message.BullyElectionMessageUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -37,7 +38,6 @@ public class GossipNode {
         this.generationTime = this.heartbeat;
         this.status = GossipStatus.NORMAL; // TODO: change to starting and update lifecycle of GossipNode to update status.
         this.alpha = new Alpha();
-
     }
 
 //	public GossipNode(InetAddress addr) {
@@ -138,6 +138,12 @@ public class GossipNode {
 
     public synchronized double getAlphaValue() { return this.alpha.getAlphaValue(); }
 
+    public synchronized void refreshAlphaValue(String configStr) { this.alpha = new Alpha(configStr); }
+
+    public synchronized boolean alphaHasConfig() { return this.alpha.hasConfig; }
+
+    public synchronized String getAlphaConfigStr() { return this.alpha.configStr; }
+
     private class Alpha implements Comparable {
 
         static final int NUM_TRIALS = 5;
@@ -147,18 +153,23 @@ public class GossipNode {
         double loadAvg;
         double uptimeAvg;
         double throughputAvg;
+        boolean hasConfig;
+        String configStr;
 
         public Alpha(){
             Flock.getOS();
             refreshAlpha();
-            //TODO add mac support
+            hasConfig = false;
         }
 
-        public Alpha(JSONObject configuration){
-            //TODO read in a configuration somewhere that provides weights for the alpha factors
+        public Alpha(String configStr){
+            double[] config = BullyElectionMessageUtils.convertConfigStr(configStr);
+            refreshAlpha(config);
+            hasConfig = true;
+            this.configStr = configStr;
         }
 
-        public void refreshAlpha(){
+        public void refreshFeatures(){
             latencyAvg = getLatencyAvg();
 
             loadAvg = getLoadAvg();
@@ -173,10 +184,21 @@ public class GossipNode {
             loadAvg = ((loadAvg) / (3));
             uptimeAvg = uptimeAvg/1000;
             uptimeAvg = ((uptimeAvg) / (3600));
+        }
 
-            alphaValue = throughputAvg + uptimeAvg + (-1*loadAvg) + (-1*latencyAvg);
+        public void refreshAlpha(){
+            refreshFeatures();
+            alphaValue = uptimeAvg + (-1*loadAvg) + (-1*latencyAvg) + throughputAvg;
             System.out.println("alpha: " + alphaValue);
+        }
 
+        public void refreshAlpha(double[] config){
+            refreshFeatures();
+            uptimeAvg = config[0]*uptimeAvg;
+            loadAvg = config[1]*loadAvg;
+            latencyAvg = config[2]*latencyAvg;
+            alphaValue = uptimeAvg + (-1*loadAvg) + (-1*latencyAvg) + throughputAvg;
+            System.out.println("alpha: " + alphaValue);
         }
 
         /**

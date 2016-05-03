@@ -63,8 +63,21 @@ public class BullyElectionCandidate extends BullyElectionState {
      */
     private void startElection() {
         log.log(Level.INFO, "Starting an election now.");
-        JSONObject msg = BullyElectionMessageUtils.makeMessage(context.getAlpha(),
-                context.getMyAddr(), BullyElectionMessageType.ELECTION);
+        JSONObject msg = null;
+        if(context.getManager().getMe().alphaHasConfig()){
+            msg = BullyElectionMessageUtils.makeMessage(
+                    context.getManager().getMe().getAlphaConfigStr(),
+                    context.getAlpha(),
+                    context.getMyAddr(),
+                    BullyElectionMessageType.ELECTION
+            );
+        }else{
+            msg = BullyElectionMessageUtils.makeMessage(
+                    context.getAlpha(),
+                    context.getMyAddr(),
+                    BullyElectionMessageType.ELECTION
+            );
+        }
         context.getSender().broadcast(msg, context.getManager().getNodes());
     }
 

@@ -56,10 +56,28 @@ public abstract class BullyElectionState extends Observable {
         }
     }
 
+    /**
+     * Sends a sitdown message to the sendTo node
+     * @param sendTo The IP of the node which will receive the message
+     */
     public void sendSitdownMessage(String sendTo) {
         try {
-            JSONObject msg = BullyElectionMessageUtils.makeMessage(context.getAlpha(),
-                    context.getMyAddr(), BullyElectionMessageType.SITDOWN);
+            JSONObject msg = null;
+            if(context.getManager().getMe().alphaHasConfig()){
+                msg = BullyElectionMessageUtils.makeMessage(
+                        context.getManager().getMe().getAlphaConfigStr(),
+                        context.getAlpha(),
+                        context.getMyAddr(),
+                        BullyElectionMessageType.SITDOWN
+                );
+            }else{
+                msg = BullyElectionMessageUtils.makeMessage(
+                        context.getAlpha(),
+                        context.getMyAddr(),
+                        BullyElectionMessageType.SITDOWN
+                );
+            }
+
             InetAddress voteDst = InetAddress.getByName(sendTo);
             context.getSender().sendMessage(msg, voteDst);
         } catch (UnknownHostException e) {

@@ -74,8 +74,21 @@ public class BullyElectionLeader extends BullyElectionState {
      * Broadcasts a suppression message to all nodes in the cluster through heartbeats
      */
     private void sendSuppression() {
-        JSONObject msg = BullyElectionMessageUtils.makeMessage(
-                this.context.getAlpha(), context.getMyAddr(), BullyElectionMessageType.SITDOWN);
+        JSONObject msg = null;
+        if(context.getManager().getMe().alphaHasConfig()){
+            msg = BullyElectionMessageUtils.makeMessage(
+                    context.getManager().getMe().getAlphaConfigStr(),
+                    context.getAlpha(),
+                    context.getMyAddr(),
+                    BullyElectionMessageType.SITDOWN
+            );
+        }else{
+            msg = BullyElectionMessageUtils.makeMessage(
+                    context.getAlpha(),
+                    context.getMyAddr(),
+                    BullyElectionMessageType.SITDOWN
+            );
+        }
         context.getSender().broadcast(msg, context.getManager().getNodes());
         System.err.printf("sending suppression");
     }
