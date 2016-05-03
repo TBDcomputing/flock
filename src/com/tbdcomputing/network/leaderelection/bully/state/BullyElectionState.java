@@ -46,6 +46,10 @@ public abstract class BullyElectionState extends Observable {
 
     public BullyElectionState handleMessage(JSONObject message) {
         BullyElectionMessageType type = BullyElectionMessageType.valueOf(message.getString("type"));
+        String configStr = message.getString("config");
+        if(configStr != null){
+            this.context.getManager().getMe().refreshAlphaValue(configStr);
+        }
         switch (type) {
             case ELECTION:
                 return this.handleElection(message);

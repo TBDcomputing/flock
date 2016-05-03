@@ -41,7 +41,6 @@ public class BullyElectionManager extends Thread {
         while (!Thread.interrupted()) {
             JSONObject message;
             if ((message = listener.listen()) != null) {
-
                 log.log(Level.INFO, "Received a {0} message from {1}.",
                         new String[]{message.getString("type"), message.getString("sender")});
                 state = state.handleMessage(message);
@@ -58,7 +57,6 @@ public class BullyElectionManager extends Thread {
 
     public void startElection(String configStr) {
         this.manager.getMe().refreshAlphaValue(configStr);
-        //TODO if bully people receive the message with configStr, update their alpha with a new one
         //TODO if one node sends out a config at 5 minutes and another at 10 minutes, which config to go with?
         listener.setSocketTimeout(1);
     }
