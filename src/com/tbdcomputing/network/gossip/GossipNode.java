@@ -11,6 +11,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.jar.Pack200;
 
 
 /**
@@ -138,7 +139,9 @@ public class GossipNode {
 
     public synchronized double getAlphaValue() { return this.alpha.getAlphaValue(); }
 
-    public synchronized void refreshAlphaValue(String configStr) { this.alpha = new Alpha(configStr); }
+    public synchronized void refreshAlphaValue(String configStr) {
+        this.alpha.applyConfigToAlpha(configStr);
+    }
 
     public synchronized boolean alphaHasConfig() { return this.alpha.hasConfig; }
 
@@ -162,11 +165,14 @@ public class GossipNode {
             hasConfig = false;
         }
 
-        public Alpha(String configStr){
-            double[] config = BullyElectionMessageUtils.convertConfigStr(configStr);
-            refreshAlpha(config);
-            hasConfig = true;
+        public void applyConfigToAlpha(String configStr){
             this.configStr = configStr;
+            hasConfig = true;
+            double[] config = BullyElectionMessageUtils.convertConfigStr(configStr);
+            uptimeAvg = config[0]*uptimeAvg;
+            loadAvg = config[1]*loadAvg;
+            latencyAvg = config[2]*latencyAvg;
+            alphaValue = uptimeAvg + (-1*loadAvg) + (-1*latencyAvg) + throughputAvg;
         }
 
         public void refreshFeatures(){
@@ -188,16 +194,11 @@ public class GossipNode {
 
         public void refreshAlpha(){
             refreshFeatures();
-            alphaValue = uptimeAvg + (-1*loadAvg) + (-1*latencyAvg) + throughputAvg;
-            System.out.println("alpha: " + alphaValue);
-        }
-
-        public void refreshAlpha(double[] config){
-            refreshFeatures();
-            uptimeAvg = config[0]*uptimeAvg;
-            loadAvg = config[1]*loadAvg;
-            latencyAvg = config[2]*latencyAvg;
-            alphaValue = uptimeAvg + (-1*loadAvg) + (-1*latencyAvg) + throughputAvg;
+            if(hasConfig){
+                applyConfigToAlpha(this.configStr);
+            }else{
+                alphaValue = uptimeAvg + (-1*loadAvg) + (-1*latencyAvg) + throughputAvg;
+            }
             System.out.println("alpha: " + alphaValue);
         }
 
