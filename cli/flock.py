@@ -155,8 +155,8 @@ class CLI(cmd.Cmd):
         if not alpha_config_str:
             send_message(mtype="start_election")
         else:
-            alpha_config = alpha_config_str.split()
-            send_message(mtype="start_election", arg=alpha_config)
+            # alpha_config = alpha_config_str.split()
+            send_message(mtype="start_election", arg=alpha_config_str)
 
     def do_query_leader(self, s):
         send_message(mtype="leader")
