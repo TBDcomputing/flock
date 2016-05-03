@@ -107,7 +107,14 @@ public class APIServerThread extends Thread implements Observer {
 
             return json.toString();
         } else if(input.get("type").toString().equals("start_election")) {
-            electionManager.startElection();
+            String configStr = input.get("config").toString();
+            if(configStr == null){
+                electionManager.startElection();
+            }else{
+                electionManager.startElection(configStr);
+            }
+
+
 
             return "";
         } else if(input.get("type").toString().equals("has_image")) {

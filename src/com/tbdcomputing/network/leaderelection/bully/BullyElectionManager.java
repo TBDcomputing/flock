@@ -56,6 +56,14 @@ public class BullyElectionManager extends Thread {
         listener.setSocketTimeout(1);
     }
 
+    public void startElection(String configStr) {
+        //TODO create a utility to convert a configStr to double[]
+        //TODO create/set the alpha object to use config
+        //TODO Implement code makes a bully election message use config
+        //TODO if bully people receive the message with configStr, update their alpha with a new one
+        listener.setSocketTimeout(1);
+    }
+
     public BullyElectionState getElectionState() {
         return state;
     }
