@@ -8,8 +8,6 @@ import org.json.JSONObject;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.Random;
 
 
 /**
@@ -146,7 +144,7 @@ public class GossipNode {
         double latencyAvg;
         double loadAvg;
         double uptimeAvg;
-        double throughputAvg;
+        double IOWaitAvg;
 
         public Alpha(){
             Flock.getOS();
@@ -163,18 +161,20 @@ public class GossipNode {
 
             loadAvg = getLoadAvg();
             uptimeAvg = getUptimeAvg();
-            throughputAvg = getThroughputAvg();
+            IOWaitAvg = getIOWaitAvg();
 
             System.out.println("latency: "+ latencyAvg);
             System.out.println("loadavg: "+loadAvg);
             System.out.println("uptimeavg: "+uptimeAvg);
+            System.out.println("IOWaitAvg: "+IOWaitAvg);
 
             latencyAvg = ((latencyAvg) / (500));
             loadAvg = ((loadAvg) / (3));
             uptimeAvg = uptimeAvg/1000;
             uptimeAvg = ((uptimeAvg) / (3600));
 
-            alphaValue = throughputAvg + uptimeAvg + (-1*loadAvg) + (-1*latencyAvg);
+
+            alphaValue = (-1*IOWaitAvg) + uptimeAvg + (-1*loadAvg) + (-1*latencyAvg);
             System.out.println("alpha: " + alphaValue);
 
         }
@@ -235,13 +235,31 @@ public class GossipNode {
 
         }
 
-        public double getThroughputAvg(){
+        public double getIOWaitAvg(){
+
+            if(Flock.os == Flock.OS.LINUX){
+                String[] IOWaitCmd = new String[]{"bash", "-c", "iostat -c|awk '/^ /{print $4}'"};
+                try {
+                    Process p = Runtime.getRuntime().exec(IOWaitCmd);
+
+                    BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                    String[] output = in.readLine().split("\\s+");
+
+                    in.close();
+
+                    return Double.parseDouble(output[0]);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return 100;
+                }
+            }else{
+                return 100;
+            }
             //computational throughput: run a task that measures it, the task should do some multithreaded assignment
             //the task should have a start time and an end time
             //the task should do some multithreaded work over the period of time endTime - startTime
             //The multithreaded work should use 10 threads to do some heavy task
             //The task should ideally not require extra memory like a merge sort
-            return 0;
         }
 
         public double getUptimeAvg(){
