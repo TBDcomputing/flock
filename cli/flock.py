@@ -81,6 +81,8 @@ def send_message(mtype, arg=None):
     msg = {"type": mtype}
     if mtype in ["has_image", "run_image", "stop_image"] and arg:
         msg["image"] = arg
+    elif mtype in ["start_election"] and arg:
+        msg["config"] = arg
 
     jsonmsg = json.dumps(msg)
     # added new line since it uses readLine() in Java
@@ -149,8 +151,12 @@ class CLI(cmd.Cmd):
         else:
             send_message(mtype="stop_image", arg=image)
 
-    def do_start_election(self, s):
-        send_message(mtype="start_election")
+    def do_start_election(self, alpha_config_str):
+        if not alpha_config_str:
+            send_message(mtype="start_election")
+        else:
+            alpha_config = alpha_config_str.split()
+            send_message(mtype="start_election", arg=alpha_config)
 
     def do_query_leader(self, s):
         send_message(mtype="leader")
