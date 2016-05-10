@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="flock:jar">
+    <output-path>$PROJECT_DIR$/bin/artifacts/flock_jar</output-path>
+    <root id="archive" name="flock_jar.jar">
+      <element id="archive" name="flock.jar">
+        <element id="module-output" name="flock" />
+      </element>
+      <element id="library" level="project" name="org.json:json:20160212" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" />
+      </element>
+    </root>
+  </artifact>
+</component>
