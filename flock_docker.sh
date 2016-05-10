@@ -89,10 +89,6 @@ if [[ $1 = "start" ]]; then
         eval "$(docker-machine env default)"
     fi
 
-	# cleans up any old docker images, added because I accumulated so many during testing
-	# docker stop $(docker ps -a -q) > /dev/null 2>/dev/null
-	# docker rm $(docker ps -a -q) > /dev/null 2>/dev/null
-
 	# this is the setup SSH server in the container method
 	rm -f Dockerfile
 	cp Dockerfile.example Dockerfile
@@ -101,13 +97,12 @@ if [[ $1 = "start" ]]; then
     else
 		sed -i 's/dockerimage/'"$docker_image"':'"$docker_image_version"'/g' Dockerfile
 	fi
+	# build the new image
 	docker build -t "ssh_${docker_image}:${docker_image_version}" .
+	# run the new image
 	docker_id=$(docker run -d --name ${ssh_port}_ssh_${docker_image} -p $ssh_port:22 ssh_${docker_image}:${docker_image_version})
-	# docker attach "$docker_id"
-	# su; ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''; ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key -N ''; ssh-keygen -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -N ''; exit
+	# generate the SSH keys
 	yes "exit" | docker exec -i "$docker_id" /bin/bash -c "su; ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''; ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key -N ''; ssh-keygen -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -N ''; exit" > /dev/null
-	# exit
-	# docker exec "$docker_id" /bin/bash -c "mkdir /var/run/sshd; echo 'root:screencast' | chpasswd; sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config; sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd; su; yes "" | ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key; yes "" | ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key; yes "" | ssh-keygen -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key"
 
 	# this is the setup SSH in another container method
 
